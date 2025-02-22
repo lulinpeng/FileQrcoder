@@ -43,7 +43,7 @@ class FileQrcoder:
     def file_to_base64_str(self):
         with open(self.file, 'rb') as f: # read file 
             binary_data = f.read()
-        base64_str = str(base64.b64encode(binary_data)) # base64 encode
+        base64_str = base64.b64encode(binary_data).decode('utf-8') # base64 encode
         logging.debug(f'base64 string = {base64_str}')
         if sk != None: # encrypt the result base64 string with secret key 'sk'
             logging.debug('encrypting the result base64 string ...')
