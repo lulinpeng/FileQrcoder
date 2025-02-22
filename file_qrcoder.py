@@ -9,6 +9,7 @@ logging.basicConfig(format='%(asctime)s.%(msecs)03d [%(levelname)s] [%(filename)
                     datefmt='%Y-%m-%d %H:%M:%S', level=logging.INFO)
 
 QR_CODE_CAPATITY_BYTES = 2953 # max capacity in byte of QR CODE 
+INDEX_LENGTH = 8 # index length of slice of base64 string is 8 bytes
 
 class FileQrcoder:
     QR_CODE_CAPATITY_BYTES = 2953  # max capacity in byte of QR CODE 
@@ -72,16 +73,32 @@ class FileQrcoder:
         img = qr.make_image(fill_color="black", back_color="white") # create picture
         return img
     
+    # put an index (8 bytes) in the front of each slice of base64 string
+    def embed_index(self, base64_str:str):
+        slice_len = self.QR_CODE_CAPATITY_BYTES - 8
+        slice_num = math.ceil(len(base64_str) / slice_len)
+        logging.debug(f'slice_num = {slice_num}')
+        r = ''
+        for i in range(slice_num):
+            start = i*slice_len
+            end = min((i+1)*slice_len, len(base64_str))
+            r += (str(i).zfill(8)+base64_str[start:end])
+        return r
+            
     # generate QR codes for the given file
     def gen_qrcodes(self):
-        data = self.file_to_base64_str()
+        base64_str = self.file_to_base64_str()
+        data = self.embed_index(base64_str)
+        logging.debug(f'data = {data}')
         num = math.ceil(len(data) / self.QR_CODE_CAPATITY_BYTES)
         imgs = []
         for i in range(num):
             start = i*self.QR_CODE_CAPATITY_BYTES
             end = min((i+1)*self.QR_CODE_CAPATITY_BYTES, len(data))
             logging.info(f'{i} / {num}, {round((end-start) / 1024 / (4/3), 3)} KB')
-            img = self.gen_qrcode(data[start:end])
+            slice_str = data[start:end]
+            logging.debug(f'slice_str = {slice_str}')
+            img = self.gen_qrcode(slice_str)
             img_path = f"{self.qrcodes_dir}qrcode_{str(i).zfill(8)}.png"
             img.save(img_path)
             imgs.append(img_path)
