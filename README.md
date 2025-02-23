@@ -2,6 +2,8 @@
 # INTRODUCTION
 It is a tool used to convert any file into a list of QRCode images.
 
+![image](https://github.com/LinpengLu/FileQrcoder/blob/main/intro.png)
+
 # RUN
 ## First Attempt
 ```python
