@@ -3,6 +3,7 @@ import base64
 import logging
 import math
 import random
+import sys
 
 # log setting
 logging.basicConfig(format='%(asctime)s.%(msecs)03d [%(levelname)s] [%(filename)s:%(lineno)d] %(message)s',
@@ -106,8 +107,12 @@ class FileQrcoder:
 
 
 if __name__ == '__main__':
-    file = 'file_qrcoder.py'
-    sk = 1234 # secret key, which is 'None' by default
+    logging.info(f'python3 file_qrcoder.py [YOUR FILE]')
+    if len(sys.argv) == 1:
+        file = sys.argv[0]
+    else:
+        file = sys.argv[1]
+    sk = None # secret key, e.g., 1234, which is 'None' by default
     qrcodes_dir = './'
     fq = FileQrcoder(file, sk, qrcodes_dir)
     qrcode_imgs = fq.gen_qrcodes()
