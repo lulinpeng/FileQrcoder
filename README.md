@@ -3,9 +3,15 @@
 It is a tool used to convert any file into a list of QRCode images.
 
 # RUN
+## First Attempt
+```python
+python3 file_qrcoder.py # generate QR code images for file 'file_qrcoder.py' itself
+python3 display_qrcodes.py # display the above QR code images
 ```
-python3 file_qrcoder.py
-python3 display_qrcodes.py
+
+## Try Your File
+```python
+python3 file_qrcoder.py [PATH OF YOUR FILE] # generate QR code images for 'YOUR FILE'
 ```
 
 # FYI
