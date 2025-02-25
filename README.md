@@ -1,8 +1,8 @@
 # FileQrcoder
 # INTRODUCTION
-It is a tool used to convert any file into a list of QRCode images.
+It is a tool used to convert a file in any format into a list of QRCode images.
 
-![image](https://github.com/LinpengLu/FileQrcoder/blob/main/intro.png)
+![image](https://github.com/lulinpeng/FileQrcoder/blob/main/intro.png)
 
 # RUN
 ## First Attempt
