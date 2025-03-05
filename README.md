@@ -4,16 +4,23 @@ It is a tool used to convert a file in any format into a list of QRCode images.
 
 ![image](https://github.com/lulinpeng/FileQrcoder/blob/main/intro.png)
 
+# REQUIREMENTS
+
+| Num | target | System  |	Requirements |
+|:--------:| :---------: | :---------:|:--------|
+|1| test_encoder.py | MacOS |```pip install qrcode==8.0 pillow==11.1.0```|
+|2| test_decoder.py | MacOS |```brew install zar, pip install pyzbar```|
+
 # RUN
 ## First Attempt
-```python
-python3 file_qrcoder.py # generate QR code images for file 'file_qrcoder.py' itself
+```shell
+python3 test_encoder.py fileqrcoder.py # generate QR code images for file 'file_qrcoder.py'
 python3 display_qrcodes.py # display the above QR code images
 ```
 
 ## Try Your File
 ```python
-python3 file_qrcoder.py [PATH OF YOUR FILE] # generate QR code images for 'YOUR FILE'
+python3 test_encoder.py [PATH OF YOUR FILE] # generate QR code images for 'YOUR FILE'
 ```
 
 # FYI
