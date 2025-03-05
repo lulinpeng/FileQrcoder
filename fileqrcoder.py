@@ -3,7 +3,6 @@ import base64
 import logging
 import math
 import random
-import sys
 
 # log setting
 logging.basicConfig(format='%(asctime)s.%(msecs)03d [%(levelname)s] [%(filename)s:%(lineno)d] %(message)s',
@@ -162,17 +161,3 @@ class FileQrcoder:
             base64_str = content
         self.base64_str_to_file(base64_str, outfile)
         return outfile
-
-if __name__ == '__main__':
-    logging.info('python3 file_qrcoder.py [YOUR FILE]')
-    # convert a file into a list of QR code images
-    infile = sys.argv[0] if len(sys.argv) == 1 else sys.argv[1]
-    logging.info(f'input file = {infile}')
-    fq_encode = FileQrcoder()
-    qrcode_img_paths = fq_encode.gen_qrcodes_from_file(infile, qrcodes_dir = './') 
-    logging.info(qrcode_img_paths)
-    
-    # recover a file from the given list of QR code images
-    fq_decode = FileQrcoder()
-    outfile = fq_decode.recover_file_from_qrcodes(qrcode_img_paths)
-    logging.info(f'output file ={outfile}')
