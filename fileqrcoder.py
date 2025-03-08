@@ -3,6 +3,7 @@ import base64
 import logging
 import math
 import random
+import os
 
 # log setting
 logging.basicConfig(format='%(asctime)s.%(msecs)03d [%(levelname)s] [%(filename)s:%(lineno)d] %(message)s',
@@ -80,7 +81,7 @@ class FileQrcoder:
         return r
 
     # generate QR codes for the given file, and put the resulting QR code images in 'qrcodes_dir'
-    def gen_qrcodes_from_file(self, infile:str, qrcodes_dir:str = './', sk:int = None):
+    def gen_qrcodes_from_file(self, infile:str, qrcodes_dir:str = './qrcodes/', sk:int = None):
         '''
         Generate QR codes for the given file, and put the resulting QR code images in 'qrcodes_dir'
           'infile': the input file path
@@ -90,6 +91,8 @@ class FileQrcoder:
         self.sk = sk
         self.infile = infile
         self.qrcodes_dir = qrcodes_dir
+        os.makedirs(qrcodes_dir, exist_ok=True)
+
         base64_str = self.file_to_base64_str()
         data = self.embed_index(base64_str)
         logging.debug(f'data = {data}')
