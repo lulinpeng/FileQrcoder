@@ -9,6 +9,6 @@ if __name__ == '__main__':
     print(f'input file = {infile}')
 
     fq_encode = FileQrcoder()
-    qrcode_img_paths = fq_encode.gen_qrcodes_from_file(infile, qrcodes_dir = './') 
+    qrcode_img_paths = fq_encode.gen_qrcodes_from_file(infile) 
     
     print(qrcode_img_paths)
