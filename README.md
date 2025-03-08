@@ -8,19 +8,19 @@ FileQrcoder is a basic tool used to convert a file in any format into a list of 
 
 | Num | target | System  |	Requirements |
 |:--------:| :---------: | :---------:|:--------|
-|1| test_encoder.py | MacOS |```pip install qrcode==8.0 pillow==11.1.0```|
-|2| test_decoder.py | MacOS |```brew install zar, pip install pyzbar```|
+|1| test_encode.py | MacOS |```pip install qrcode==8.0 pillow==11.1.0```|
+|2| test_decode.py | MacOS |```brew install zar, pip install pyzbar```|
 
 # RUN
 ## First Attempt
 ```shell
-python3 test_encoder.py fileqrcoder.py # generate QR code images for file 'file_qrcoder.py'
+python3 test_encode.py fileqrcoder.py # generate QR code images for file 'file_qrcoder.py'
 python3 display_qrcodes.py # display the above QR code images
 ```
 
 ## Try Your File
 ```python
-python3 test_encoder.py [PATH OF YOUR FILE] # generate QR code images for 'YOUR FILE'
+python3 test_encode.py [PATH OF YOUR FILE] # generate QR code images for 'YOUR FILE'
 ```
 
 # FYI
