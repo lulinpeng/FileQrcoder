@@ -19,7 +19,7 @@ python3 display_qrcodes.py # display the above QR code images
 ```
 
 ## Try Your File
-```python
+```shell
 python3 test_encode.py [PATH OF YOUR FILE] # generate QR code images for 'YOUR FILE'
 ```
 
