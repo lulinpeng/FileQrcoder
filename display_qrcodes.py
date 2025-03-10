@@ -2,13 +2,15 @@ import tkinter as tk
 from PIL import Image, ImageTk
 import math
 import logging
+import os
 
 # log setting
 logging.basicConfig(format='%(asctime)s.%(msecs)03d [%(levelname)s] [%(filename)s:%(lineno)d] %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S', level=logging.DEBUG)
 
 # concatenate images horizontally
-def horizontal_concat_img(img_paths: str, batch_size:int, interval:int = 0):
+def horizontal_concat_img(img_paths: str, batch_size:int, interval:int = 0, out_dir="./horizontal/"):
+    os.makedirs(out_dir, exist_ok=True)
     first_img = Image.open(img_paths[0])
     width, height = first_img.size
     logging.debug(f'width = {width}, height = {height}')
@@ -22,13 +24,14 @@ def horizontal_concat_img(img_paths: str, batch_size:int, interval:int = 0):
                 logging.debug(f'img_paths[idx] = {img_paths[idx]}')
                 img = Image.open(img_paths[idx]).resize((width, height))
                 res_img.paste(img, box=((width+interval)*j , 0))
-        res_img_path = f'horizontal_concat_qrcode_{str(i).zfill(8)}.png'
+        res_img_path = f'{out_dir}horizontal_concat_qrcode_{str(i).zfill(8)}.png'
         res_img.save(res_img_path)
         res_img_paths.append(res_img_path)
     return res_img_paths
 
 # concatenate images vertically
-def vertical_concat_img(img_paths: str, batch_size:int, interval:int = 0):
+def vertical_concat_img(img_paths: str, batch_size:int, interval:int = 0, out_dir="./vertical/"):
+    os.makedirs(out_dir, exist_ok=True)
     first_img = Image.open(img_paths[0])
     width, height = first_img.size
     logging.debug(f'width = {width}, height = {height}')
@@ -42,7 +45,7 @@ def vertical_concat_img(img_paths: str, batch_size:int, interval:int = 0):
                 logging.debug(f'img_paths[idx] = {img_paths[idx]}')
                 img = Image.open(img_paths[idx]).resize((width, height))
                 res_img.paste(img, box=(0 , (height+interval)*j))
-        res_img_path = f'vertical_concat_qrcode_{str(i).zfill(8)}.png'
+        res_img_path = f'{out_dir}vertical_concat_qrcode_{str(i).zfill(8)}.png'
         res_img.save(res_img_path)
         res_img_paths.append(res_img_path)
     return res_img_paths
@@ -60,18 +63,22 @@ def display_qrcode():
     canvas.create_image(center_x, center_y, image=tk_photo)  # show QR code in the center of canvas
     root.after(time_interval, display_qrcode)  # call 'display_qrcode' after 'time_interval' milliseconds
 
-dir_path = './'
-qrcodes = [f"{dir_path}qrcode_{str(i).zfill(8)}.png" for i in range(3)]
-qrcodes = ['./qrcode_00000000.png', './qrcode_00000001.png', './qrcode_00000002.png']
+dir_path = './qrcodes/'
+# qrcodes = [f"{dir_path}qrcode_{str(i).zfill(8)}.png" for i in range(3)]
+# qrcodes = ['./qrcodes/qrcode_00000000.png', './qrcodes/qrcode_00000001.png', './qrcodes/qrcode_00000002.png']
 
-qrcodes = vertical_concat_img(qrcodes, 2) # concatenate images horizontally
+qrcodes = os.listdir(dir_path) # get all qrcode images
+qrcodes = [dir_path+qrcode for qrcode in qrcodes]
 
-qrcodes = horizontal_concat_img(qrcodes, 2) # concatenate images horizontally
+vertical_qrcodes = vertical_concat_img(qrcodes, 2) # concatenate images vertically
+
+horizontal_qrcodes = horizontal_concat_img(vertical_qrcodes, 2) # concatenate images horizontally
+
+
+width, height = Image.open(horizontal_qrcodes[0]).size
 
 root = tk.Tk()
 root.title("Display QR Code")
-
-width, height = Image.open(qrcodes[0]).size
 canvas = tk.Canvas(root, width=width, height=height)
 canvas.pack() # put a canvas
 
