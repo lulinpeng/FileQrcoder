@@ -17,6 +17,47 @@ def images2gif(img_paths:list, out_gif:str = 'out.gif'):
     images[0].save(out_gif, save_all=True, append_images=images[1:], duration=200, loop=0)
     return
 
+def extend_margin(x0:int, y0:int, x1:int, y1:int, margin_w:int, margin_h:int, w:int, h:int):
+    logging.debug(f'extend_margin start: x0 = {x0}, y0 = {y0}, x1 = {x1}, y1 = {y1}, margin_w = {margin_w}, margin_y = {margin_w}, w = {w}, h = {h}')
+    if y0 - margin_w >= 0:
+        y0 -= margin_w
+    if y1 + margin_w <= w:
+        y1 += margin_w
+
+    if x0 - margin_h >= 0:
+        x0 -= margin_h
+    if x1 + margin_h <= h:
+        x1 += margin_h
+    logging.debug(f'extend_margin end: x0 = {x0}, y0 = {y0}, x1 = {x1}, y1 = {y1}, margin_w = {margin_w}, margin_y = {margin_w}, w = {w}, h = {h}')
+    return x0, y0, x1, y1
+
+def split_image(image_paths:list, rows, cols, out_dir:str, margin:float = 0.2):
+    logging.debug(f'split_image: out_dir = {out_dir}')
+    os.makedirs(out_dir, exist_ok=True)
+    img = Image.open(image_paths[0])
+    w, h = img.size # 获取图片的宽度和高度
+    logging.debug(f'split_image: w = {w}, h = {h}')
+    block_w = w // cols
+    block_h = h // rows
+    images = []
+
+    add_w = round(block_w * margin)
+    add_h = round(block_h * margin)
+    for k in range(len(image_paths)):
+        for i in range(rows):
+            for j in range(cols):
+                x0, x1 = j * block_w, (j + 1) * block_w
+                y0, y1 = i * block_h, (i + 1) * block_h
+
+                x0, y0, x1, y1 = extend_margin(x0, y0, x1, y1, add_w, add_h, w, h)
+                
+                block_img = img.crop((x0, y0, x1, y1))
+                block_img.save(f'{out_dir}split_image_{str(k * cols * rows + i * cols + j).zfill(8)}.png')
+                images.append(block_img) # 切割图片并添加到列表中
+            
+    return images
+
+# concatenate the given images
 def concat_img(img_paths: list, row:int, col:int, out_dir="./concat/", interval:int = 0):
     logging.debug(f'concat_img: out_dir = {out_dir}')
     os.makedirs(out_dir, exist_ok=True)
