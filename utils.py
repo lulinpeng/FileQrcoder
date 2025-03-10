@@ -18,6 +18,7 @@ def images2gif(img_paths:list, out_gif:str = 'out.gif'):
 
 # concatenate images horizontally
 def horizontal_concat_img(img_paths: list, batch_size:int, interval:int = 0, out_dir="./horizontal/"):
+    logging.debug(f'out_dir = {out_dir}')
     os.makedirs(out_dir, exist_ok=True)
     first_img = Image.open(img_paths[0])
     width, height = first_img.size
