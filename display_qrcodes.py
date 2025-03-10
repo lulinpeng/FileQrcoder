@@ -64,8 +64,6 @@ def display_qrcode():
     root.after(time_interval, display_qrcode)  # call 'display_qrcode' after 'time_interval' milliseconds
 
 dir_path = './qrcodes/'
-# qrcodes = [f"{dir_path}qrcode_{str(i).zfill(8)}.png" for i in range(3)]
-# qrcodes = ['./qrcodes/qrcode_00000000.png', './qrcodes/qrcode_00000001.png', './qrcodes/qrcode_00000002.png']
 
 qrcodes = os.listdir(dir_path) # get all qrcode images
 qrcodes = [dir_path+qrcode for qrcode in qrcodes]
