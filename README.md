@@ -23,5 +23,11 @@ python3 display_qrcodes.py # display the above QR code images
 python3 test_encode.py [PATH OF YOUR FILE] # generate QR code images for 'YOUR FILE'
 ```
 
+# BENCHMARK
+Testing conducted on: **Apple MacBook Pro (13-inch, M1, 2020)**. Specs: Apple M1 chip (8-core CPU/GPU), 16GB RAM, macOS [Sequoia, 15.3.1] 
+| Num | Size of input file | CPU cores  |	Num of QR code images | Total time | Rate |
+|:--------:| :---------: | :---------:|:--------:| :--------: | :--------: |
+|1| 497KB | 1 | 231 | 52 secs| 76.5kbps|
+
 # FYI
 Base64 symbols are: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/']
