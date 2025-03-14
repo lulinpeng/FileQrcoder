@@ -1,6 +1,6 @@
 # FileQrcoder
 # INTRODUCTION
-FileQrcoder is a basic tool used to convert a file in any format into a list of QRCode images. Additionally, it also supports encrypting files and then converting them into QRCodes.
+FileQrcoder is a basic tool used to convert a file in any format into a list of QRCode images. *Additionally, it also supports encrypting files and then converting them into QRCodes.*
 
 ![image](https://github.com/lulinpeng/FileQrcoder/blob/main/intro.png)
 
