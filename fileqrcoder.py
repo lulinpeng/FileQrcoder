@@ -142,16 +142,17 @@ class FileQrcoder:
             
     # recover a file from the given list of QR Code images
     def recover_file_from_qrcodes(self, qrcode_imgs:list, sk:int = None, outfile:str = './recovered_file'):
-        from pyzbar.pyzbar import decode
+        from pyzbar import pyzbar
         from PIL import Image
         all_slices = {}
         for i in range(len(qrcode_imgs)):
+            print(f' i = {i}')
             image = Image.open(qrcode_imgs[i])
-            decoded_objects = decode(image)
+            decoded_objects = pyzbar.decode(image)
             for obj in decoded_objects:
                 content = obj.data.decode("utf-8")
-                logging.info(f'recover {i} / {len(qrcode_imgs)}, {round((len(content)) / 1024 / (4/3), 3)} KB')
-                logging.debug(f'{content[:self.INDEX_LENGTH]}')
+                idx = content[:self.INDEX_LENGTH]
+                logging.info(f'recover {i} / {len(qrcode_imgs)}, {round((len(content)) / 1024 / (4/3), 3)} KB, idx = {idx}, img path = {qrcode_imgs[i]}')
                 try:
                     slice_id = int(content[:self.INDEX_LENGTH])
                 except:

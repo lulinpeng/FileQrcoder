@@ -14,12 +14,18 @@ FileQrcoder is a basic tool used to convert a file in any format into a list of 
 # RUN
 ## First Attempt
 ```shell
+cd FileQrcoder/
+export PYTHONPATH="${PYTHONPATH}:${pwd}"
+
 python3 test_encode.py fileqrcoder.py # generate QR code images for file 'file_qrcoder.py'
 python3 display_qrcodes.py # display the above QR code images
 ```
 
 ## Try Your File
 ```shell
+cd FileQrcoder/
+export PYTHONPATH="${PYTHONPATH}:${pwd}"
+
 python3 test_encode.py [PATH OF YOUR FILE] # generate QR code images for 'YOUR FILE'
 
 export DYLD_LIBRARY_PATH=/opt/homebrew/lib/ # for 'libzbar.dylib'
