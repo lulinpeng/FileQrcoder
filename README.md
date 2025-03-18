@@ -11,7 +11,7 @@ FileQrcoder is a basic tool used to convert a file in any format into a list of 
 |1| test_encode.py | MacOS |```pip install qrcode==8.0 pillow==11.1.0```|
 |2| test_decode.py | MacOS |```brew install zar, pip install pyzbar, export DYLD_LIBRARY_PATH=/opt/homebrew/lib/```|
 
-# RUN
+# QUICK START
 ## First Attempt
 ```shell
 cd FileQrcoder/
