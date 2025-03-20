@@ -17,8 +17,15 @@ FileQrcoder is a basic tool used to convert a file in any format into a list of 
 cd FileQrcoder/
 export PYTHONPATH="${PYTHONPATH}:${pwd}"
 
-python3 test_encode.py fileqrcoder.py # generate QR code images for file 'file_qrcoder.py'
-python3 display_qrcodes.py # display the above QR code images
+python3 demo/test_encode.py fileqrcoder.py # generate QR code images for file 'file_qrcoder.py'
+ls -al qrcodes/
+# qrcode_00000000.png
+# qrcode_00000001.png
+# qrcode_00000002.png
+# qrcode_00000003.png
+
+
+python3 demo/display_qrcodes.py # display the above QR code images
 ```
 
 ## Try Your File
@@ -26,10 +33,10 @@ python3 display_qrcodes.py # display the above QR code images
 cd FileQrcoder/
 export PYTHONPATH="${PYTHONPATH}:${pwd}"
 
-python3 test_encode.py [PATH OF YOUR FILE] # generate QR code images for 'YOUR FILE'
+python3 demo/test_encode.py [PATH OF YOUR FILE] # generate QR code images for 'YOUR FILE'
 
 export DYLD_LIBRARY_PATH=/opt/homebrew/lib/ # for 'libzbar.dylib'
-python3 test_decode.py
+python3 demo/test_decode.py
 ```
 
 # BENCHMARK
