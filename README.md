@@ -83,5 +83,15 @@ export target_file=a.txt target_dir=/root/test/ image=fileqrcoder
 mkdir -p ${target_dir} && echo "Hello, this is FileQrcoder" > ${target_dir}${target_file}
 docker run --mount type=bind,source=${target_dir},target=/data ${image} sh -c 'cd /data/ && python3 /root/FileQrcoder/test_encode.py ${target_file}'
 ```
+
+# MORE TESTS
+```shell
+cd FileQrcoder
+export PYTHONPATH="..":$PYTHONPATH
+python3 generate.py
+python3 test_locate.py
+```
+
+
 # FYI
 Base64 symbols are: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/']
