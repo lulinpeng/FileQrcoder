@@ -1,4 +1,4 @@
-from ..fileqrcoder import FileQrcoder # export LD_LIBRARY_PATH=/opt/homebrew/Cellar/zbar/0.23.93_2/lib/:$LD_LIBRARY_PATH
+from fileqrcoder import FileQrcoder # export LD_LIBRARY_PATH=/opt/homebrew/Cellar/zbar/0.23.93_2/lib/:$LD_LIBRARY_PATH
 import sys
 import os
 # export DYLD_LIBRARY_PATH=/opt/homebrew/lib/
