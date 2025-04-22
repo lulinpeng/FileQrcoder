@@ -53,7 +53,22 @@ cd FileQrcoder/
 export image=fileqrcoder
 docker build -t ${image} -f Dockerfile .
 ```
-## TEST IMAGE
+
+## Manual Mode
+```shell
+# enter your directory
+cd xxx
+# start a container
+docker run -it --name qrcoder --mount type=bind,source="$(pwd)",target=/base fileqrcoder:1.0
+
+cd /root/FileQrcoder/demo
+export PYTHONPATH="/root/FileQrcoder/":$PYTHONPATH
+python3 test_encode.py
+
+python3 test_decode.py qrcodes/
+```
+
+## Automated Mode
 ```shell
 # MacOS
 #example: test/a.txt
