@@ -8,16 +8,39 @@ import qrcode
 logging.basicConfig(format='%(asctime)s.%(msecs)03d [%(levelname)s] [%(filename)s:%(lineno)d] %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S', level=logging.DEBUG)
 
+# put sub-image 'subimg' at the relative position (x, y) on image 'img'
+# 0.0 < x_ratio < 1.0
+# 0.0 < y_ratio < 1.0
+def put_subimg(img:Image, subimg:Image, x_ratio:float = 0.0, y_ratio:float = 0.0):
+    if x_ratio < 0.0 or x_ratio > 1.0 or y_ratio < 0.0 or y_ratio > 1.0:
+        error_msg = f'invalid x_ratio = {x_ratio} or y_ratio = {y_ratio}'
+        print(error_msg)
+        raise BaseException(error_msg)
+    
+    width, height = img.size
+    sub_width, sub_height = subimg.size
+    if width < sub_width or height < sub_height:
+        error_msg = f'width = {width} < sub_width = {sub_height} or height = {height} < sub_height = {sub_height}'
+        print(error_msg)
+        raise BaseException(error_msg)
+    
+    x = math.ceil((width - sub_width) * x_ratio)
+    y = math.ceil((height - sub_height) * y_ratio)
+
+    img.paste(subimg, (x,y))
+    return
+
+
 # generate a QR code image for a given string and save it
 def gen_and_save_qrcode(data:str, outfile:str='qrcode.png', QR_CODE_CAPATITY_BYTES:int = 7, QR_CODE_VERSION:int = 1, QR_CODE_ERROR_CORRECT = qrcode.constants.ERROR_CORRECT_H):
     if len(data) > QR_CODE_CAPATITY_BYTES:
         error_msg = f'too many bytes: len(data) = {len(data)} > QR_CODE_CAPATITY_BYTES = {QR_CODE_CAPATITY_BYTES}'
         print(error_msg)
-        raise error_msg
+        raise BaseException(error_msg)
     qr = qrcode.QRCode(
         version=QR_CODE_VERSION,
         error_correction=QR_CODE_ERROR_CORRECT,
-        box_size=3,  # each pixel size which is default by 1
+        box_size=4,  # each pixel size which is default by 1
         border=0,  # frame width which is default by 4
     )
     qr.add_data(data) # add data
