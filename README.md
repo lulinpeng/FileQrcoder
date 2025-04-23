@@ -14,7 +14,7 @@ FileQrcoder is a basic tool used to convert a file in any format into a list of 
 # QUICK START
 ## First Attempt
 ```shell
-cd FileQrcoder/
+cd FileQrcoder/demo/
 export PYTHONPATH="${PYTHONPATH}:${pwd}"
 
 python3 demo/test_encode.py fileqrcoder.py # generate QR code images for file 'file_qrcoder.py'
