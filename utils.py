@@ -2,10 +2,29 @@ from PIL import Image
 import math
 import logging
 import os
+import qrcode
 
 # log setting
 logging.basicConfig(format='%(asctime)s.%(msecs)03d [%(levelname)s] [%(filename)s:%(lineno)d] %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S', level=logging.DEBUG)
+
+# generate a QR code image for a given string and save it
+def gen_and_save_qrcode(data:str, outfile:str='qrcode.png', QR_CODE_CAPATITY_BYTES:int = 7, QR_CODE_VERSION:int = 1, QR_CODE_ERROR_CORRECT = qrcode.constants.ERROR_CORRECT_H):
+    if len(data) > QR_CODE_CAPATITY_BYTES:
+        error_msg = f'too many bytes: len(data) = {len(data)} > QR_CODE_CAPATITY_BYTES = {QR_CODE_CAPATITY_BYTES}'
+        print(error_msg)
+        raise error_msg
+    qr = qrcode.QRCode(
+        version=QR_CODE_VERSION,
+        error_correction=QR_CODE_ERROR_CORRECT,
+        box_size=3,  # each pixel size which is default by 1
+        border=0,  # frame width which is default by 4
+    )
+    qr.add_data(data) # add data
+    qr.make(fit=True)
+    img = qr.make_image(fill_color="black", back_color="white") # create QR code image
+    img.save(outfile)
+    return
 
 # convert a list of images into a GIF picture
 def images2gif(img_paths:list, out_gif:str = 'out.gif'):

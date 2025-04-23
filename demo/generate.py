@@ -2,26 +2,7 @@ from PIL import Image
 import random
 import math
 import qrcode
-
-def gen_and_save_qrcode(data:str, outfile:str='qrcode.png'):
-    QR_CODE_CAPATITY_BYTES = 7 
-    QR_CODE_VERSION = 1
-    QR_CODE_ERROR_CORRECT = qrcode.constants.ERROR_CORRECT_H
-    if len(data) > QR_CODE_CAPATITY_BYTES:
-        error_msg = f'too many bytes: len(data) = {len(data)} > QR_CODE_CAPATITY_BYTES = {QR_CODE_CAPATITY_BYTES}'
-        print(error_msg)
-        raise error_msg
-    qr = qrcode.QRCode(
-        version=QR_CODE_VERSION,
-        error_correction=QR_CODE_ERROR_CORRECT,
-        box_size=3,  # each pixel size which is default by 1
-        border=0,  # frame width which is default by 4
-    )
-    qr.add_data(data) # add data
-    qr.make(fit=True)
-    img = qr.make_image(fill_color="black", back_color="white") # create QR code image
-    img.save(outfile)
-    return
+import utils
 
 # get maximum and minimum distace among points
 def max_min_dist(points:list):
@@ -59,7 +40,7 @@ if __name__ == '__main__':
         data = str(i).zfill(7)
         file = f"qrcode_{data}.png"
         png_files.append(file)
-        gen_and_save_qrcode(data, file)
+        utils.gen_and_save_qrcode(data, file)
 
     images = [Image.open(f).convert('RGB') for f in png_files]
     width, height = images[0].size

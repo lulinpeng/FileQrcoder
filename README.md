@@ -50,7 +50,7 @@ Testing conducted on: **Apple MacBook Pro (13-inch, M1, 2020)**. Specs: Apple M1
 ## BUILD DOCKER IMAGE
 ```shell
 cd FileQrcoder/
-export image=fileqrcoder
+export image=fileqrcoder:1.0
 docker build -t ${image} -f Dockerfile .
 ```
 
@@ -62,7 +62,7 @@ cd xxx
 docker run -it --name qrcoder --mount type=bind,source="$(pwd)",target=/base fileqrcoder:1.0
 
 cd /root/FileQrcoder/demo
-export PYTHONPATH="/root/FileQrcoder/":$PYTHONPATH
+export PYTHONPATH="..":$PYTHONPATH
 python3 test_encode.py
 
 python3 test_decode.py qrcodes/
@@ -86,8 +86,8 @@ docker run --mount type=bind,source=${target_dir},target=/data ${image} sh -c 'c
 
 # MORE TESTS
 ```shell
-cd FileQrcoder
-export PYTHONPATH="..":$PYTHONPATH
+cd /base/FileQrcoder/demo/
+export PYTHONPATH="/base/FileQrcoder/":$PYTHONPATH
 python3 generate.py
 python3 test_locate.py
 ```
