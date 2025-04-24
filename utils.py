@@ -3,10 +3,21 @@ import math
 import logging
 import os
 import qrcode
+import colorsys
 
 # log setting
 logging.basicConfig(format='%(asctime)s.%(msecs)03d [%(levelname)s] [%(filename)s:%(lineno)d] %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S', level=logging.DEBUG)
+
+# generate n highly distinguishable colors
+def gen_color_table(n:int = 1024, saturation=0.8, value=0.9):
+    colors = []
+    for i in range(n):
+        hue = i / n  # hue is uniformly distributed between 0 and 1
+        r, g, b = colorsys.hsv_to_rgb(hue, saturation, value)
+        rgb = (int(r * 255), int(g * 255), int(b * 255))
+        colors.append(rgb)
+    return colors
 
 # put sub-image 'subimg' at the relative position (x, y) on image 'img'
 # 0.0 < x_ratio < 1.0
