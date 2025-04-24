@@ -9,6 +9,12 @@ import colorsys
 logging.basicConfig(format='%(asctime)s.%(msecs)03d [%(levelname)s] [%(filename)s:%(lineno)d] %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S', level=logging.DEBUG)
 
+def heic_to_png(heic_path:str, png_path:str, quality:int=100):
+    import heic2png
+    heic_img = heic2png.HEIC2PNG(heic_path, quality=90)
+    heic_img.save(png_path)
+    return 
+
 # generate n highly distinguishable colors
 def gen_color_table(n:int = 1024, saturation=0.8, value=0.9):
     colors = []

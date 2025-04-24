@@ -1,5 +1,6 @@
 from PIL import Image, ImageDraw
 from pyzbar.pyzbar import decode
+import utils
 
 def check_valid(img:Image):
     barcodes = decode(image)
@@ -25,13 +26,7 @@ def check_valid(img:Image):
         return False
     return True
 
-if __name__ == '__main__':
-    infile = 'random.png'
-    print(f'locate and label all QR codes in the image {infile}')
-    image = Image.open(infile).convert('RGB')
-    draw = ImageDraw.Draw(image)
-    barcodes = decode(image)
-    print(f'len(barcodes) = {len(barcodes)}')
+def mark_qrcodes(image:Image):
     for barcode in decode(image):
         print(f'barcode = {barcode}')
         rect = barcode.rect
@@ -40,4 +35,15 @@ if __name__ == '__main__':
         x1, y1 = rect.left + rect.width, rect.top + rect.height
         draw.rectangle(((x0, y0), (x1, y1)), outline='#0080ff')
         draw.polygon(barcode.polygon, outline='#e945ff')
+    return
+
+
+if __name__ == '__main__':
+    png_path = 'test.png'
+    print(f'locate and label all QR codes in the image {png_path}')
+    image = Image.open(png_path).convert('RGB')
+    draw = ImageDraw.Draw(image)
+    barcodes = decode(image)
+    print(f'len(barcodes) = {len(barcodes)}')
+    mark_qrcodes(image)
     image.save('out.png')

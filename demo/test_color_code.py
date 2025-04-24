@@ -44,7 +44,7 @@ def put_ceils(img:Image):
             img.paste(rect_img, (x, y))
 
 if __name__ == '__main__':
-    rows, cols = 128, 80
+    rows, cols = 138, 80
     print(f'rows = {rows}, cols = {cols}')
     ceil_w, ceil_h = 20, 20
     print(f'ceil width = {ceil_w}, ceil_height = {ceil_h}')
