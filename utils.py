@@ -25,6 +25,16 @@ def gen_color_table(n:int = 1024, saturation=0.8, value=0.9):
         colors.append(rgb)
     return colors
 
+# generate n uniform distance color
+def gen_uniform_color_table():
+    t = [i * 32 for i in range(8)]
+    colors = []
+    for i in range(8):
+        for j in range(8):
+            for k in range(8):
+                colors.append((t[i], t[j], t[k]))
+    return colors
+
 # put sub-image 'subimg' at the relative position (x, y) on image 'img'
 # 0.0 < x_ratio < 1.0
 # 0.0 < y_ratio < 1.0
