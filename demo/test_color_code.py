@@ -10,10 +10,11 @@ def gen_qrcodes(n:int, width:int=None, height:int=None):
         data = str(i).zfill(7)
         file = f"qrcode_{data}.png"
         qrcodes_png.append(file)
-        utils.gen_and_save_qrcode(data, file)
+        utils.gen_and_save_qrcode(data, file, QR_CODE_VERSION=8)
 
     qrcodes = [Image.open(f).convert('RGB') for f in qrcodes_png]
     qr_width, qr_height = qrcodes[0].size
+    print(f'gen_qrcodes: QR code width * height = {qr_width} * {qr_height}')
     # resize width
     if width != None:
         for i in range(len(qrcodes)):
@@ -59,7 +60,7 @@ def gen_ceils_with_random_color(n:int, color_table:list, width:int, height:int):
 def gen_color_code_with_corners(rows:int, cols:int, ceil_w:int, ceil_h:int, background_color = (230, 230, 190), outfile:str='color_code_corners.png'):
     print(f'rows = {rows}, cols = {cols}')
     print(f'ceil width = {ceil_w}, ceil_height = {ceil_h}')
-    qr_width, qr_height, qrcodes = gen_qrcodes(4, 80, 80)
+    qr_width, qr_height, qrcodes = gen_qrcodes(4)
     width, height = qr_width * 2 + ceil_w * rows, qr_height * 2 + ceil_h * cols
     print(f'width = {width}, height = {height}')
 
@@ -88,7 +89,7 @@ def gen_color_code_with_corners(rows:int, cols:int, ceil_w:int, ceil_h:int, back
 def gen_color_code_with_center(rows:int, cols:int, ceil_w:int, ceil_h:int, background_color:tuple = (230, 230, 190), outfile:str='color_code_center.png'):
     print(f'rows = {rows}, cols = {cols}')
     print(f'ceil width = {ceil_w}, ceil_height = {ceil_h}')
-    qr_width, qr_height, qrcodes = gen_qrcodes(4, 320, 320)
+    qr_width, qr_height, qrcodes = gen_qrcodes(4)
     print(f'qr_width = {qr_width}, qr_height = {qr_height}')
     width, height = ceil_w * rows, ceil_h * cols
     print(f'width = {width}, height = {height}')

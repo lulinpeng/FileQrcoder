@@ -1,6 +1,7 @@
 from PIL import Image, ImageDraw
 from pyzbar.pyzbar import decode
 import utils
+import sys
 
 def check_valid(img:Image):
     barcodes = decode(image)
@@ -39,7 +40,8 @@ def mark_qrcodes(image:Image):
 
 
 if __name__ == '__main__':
-    png_path = 'test.png'
+    print('python3 test_locate.py /path/to/picture')
+    png_path = sys.argv[1]
     print(f'locate and label all QR codes in the image {png_path}')
     image = Image.open(png_path).convert('RGB')
     draw = ImageDraw.Draw(image)
