@@ -1,21 +1,20 @@
-# FILE ==> List of QR Code Images
 from fileqrcoder import FileQrcoder
 import sys
+import argparse
 
 if __name__ == '__main__':
     print('python3 test_encoder.py [path of your file] [secret key (a integer)]')
     # convert a file into a list of QR code images
-    sk = None
-    if len(sys.argv) == 1:
-        infile = sys.argv[0]
-    elif len(sys.argv) == 2:
-        infile = sys.argv[1] 
-    elif len(sys.argv) == 3: 
-        infile = sys.argv[1]
-        sk = int(sys.argv[2])
+    parser = argparse.ArgumentParser(description='FileQrcoder')
+    parser.add_argument('--file', type=str, default=sys.argv[0],
+                       help='file to be encoded')
+    parser.add_argument('--sk', type=int, default=None,
+                       help='secret key (a integer)')
+    parser.add_argument('--qrcode_version', type=int, default=40,
+                       help='qrcode version (1-40)')
+    args = parser.parse_args()
 
-    print(f'input file = {infile}, sk = {sk}\n')
-    fq_encode = FileQrcoder()
-    qrcode_img_paths = fq_encode.gen_qrcodes_from_file(infile, sk=None) 
-    
+    print(f'input file = {args.file}, sk = {args.sk}\n')
+    fq_encode = FileQrcoder(qrcode_version=args.qrcode_version)
+    qrcode_img_paths = fq_encode.gen_qrcodes_from_file(args.file, sk=args.sk) 
     print(qrcode_img_paths)
