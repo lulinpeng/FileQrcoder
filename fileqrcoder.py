@@ -9,17 +9,71 @@ import os
 logging.basicConfig(format='%(asctime)s.%(msecs)03d [%(levelname)s] [%(filename)s:%(lineno)d] %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S', level=logging.INFO)
 
+QRCODE_VERSIONS = {
+    1: {'L': 17, 'M': 14, 'Q': 11, 'H': 8},
+    2: {'L': 32, 'M': 26, 'Q': 20, 'H': 15},
+    3: {'L': 53, 'M': 42, 'Q': 32, 'H': 24},
+    4: {'L': 78, 'M': 62, 'Q': 46, 'H': 34},
+    5: {'L': 106, 'M': 84, 'Q': 60, 'H': 44},
+    6: {'L': 134, 'M': 106, 'Q': 74, 'H': 58},
+    7: {'L': 154, 'M': 122, 'Q': 86, 'H': 64},
+    8: {'L': 192, 'M': 152, 'Q': 108, 'H': 84},
+    9: {'L': 230, 'M': 180, 'Q': 130, 'H': 98},
+    10: {'L': 271, 'M': 215, 'Q': 151, 'H': 119},
+    11: {'L': 321, 'M': 254, 'Q': 177, 'H': 137},
+    12: {'L': 367, 'M': 290, 'Q': 203, 'H': 155},
+    13: {'L': 425, 'M': 334, 'Q': 241, 'H': 177},
+    14: {'L': 458, 'M': 365, 'Q': 258, 'H': 194},
+    15: {'L': 520, 'M': 408, 'Q': 292, 'H': 220},
+    16: {'L': 586, 'M': 459, 'Q': 322, 'H': 250},
+    17: {'L': 644, 'M': 504, 'Q': 364, 'H': 280},
+    18: {'L': 718, 'M': 564, 'Q': 394, 'H': 310},
+    19: {'L': 792, 'M': 611, 'Q': 442, 'H': 338},
+    20: {'L': 858, 'M': 661, 'Q': 482, 'H': 382},
+    21: {'L': 929, 'M': 715, 'Q': 509, 'H': 403},
+    22: {'L': 1003, 'M': 779, 'Q': 565, 'H': 439},
+    23: {'L': 1091, 'M': 864, 'Q': 611, 'H': 461},
+    24: {'L': 1171, 'M': 910, 'Q': 661, 'H': 511},
+    25: {'L': 1273, 'M': 958, 'Q': 715, 'H': 535},
+    26: {'L': 1367, 'M': 1046, 'Q': 751, 'H': 593},
+    27: {'L': 1465, 'M': 1153, 'Q': 805, 'H': 625},
+    28: {'L': 1528, 'M': 1219, 'Q': 868, 'H': 658},
+    29: {'L': 1628, 'M': 1273, 'Q': 908, 'H': 698},
+    30: {'L': 1732, 'M': 1370, 'Q': 982, 'H': 742},
+    31: {'L': 1840, 'M': 1452, 'Q': 1030, 'H': 790},
+    32: {'L': 1952, 'M': 1538, 'Q': 1112, 'H': 842},
+    33: {'L': 2068, 'M': 1628, 'Q': 1168, 'H': 898},
+    34: {'L': 2188, 'M': 1722, 'Q': 1228, 'H': 958},
+    35: {'L': 2303, 'M': 1809, 'Q': 1283, 'H': 983},
+    36: {'L': 2431, 'M': 1911, 'Q': 1351, 'H': 1051},
+    37: {'L': 2563, 'M': 1989, 'Q': 1423, 'H': 1093},
+    38: {'L': 2699, 'M': 2099, 'Q': 1499, 'H': 1139},
+    39: {'L': 2809, 'M': 2213, 'Q': 1579, 'H': 1219},
+    40: {'L': 2953, 'M': 2331, 'Q': 1663, 'H': 1273}
+}
+
+ERROR_CORRECT_MAP = {
+    'L':qrcode.constants.ERROR_CORRECT_L,
+    'M':qrcode.constants.ERROR_CORRECT_M,
+    'Q':qrcode.constants.ERROR_CORRECT_Q,
+    'H':qrcode.constants.ERROR_CORRECT_H
+}
 
 class FileQrcoder:
-    QR_CODE_CAPATITY_BYTES = 2953  # max capacity in byte of QR CODE 
-    QR_CODE_VERSION = 40  # QR code version，1-40, more version, more information, and larger QR code
-    QR_CODE_ERROR_CORRECT = qrcode.constants.ERROR_CORRECT_L  # fault tolerance, L(7%)，M(15%)，Q(25%)，H(30%)
-    INDEX_LENGTH = 8 # index length of slice of base64 string is 8 bytes
+    qrcode_capacity:int = None  # max capacity in byte of QR CODE 
+    qrcode_version:int = None  # QR code version，1-40, more version, more information, and larger QR code
+    qrcode_box_size:int = None # each pixel size which is default by 1
+    qrcode_error_correct:int = None  # fault tolerance, L(7%)，M(15%)，Q(25%)，H(30%)
+    index_len = 8 # index length of slice of base64 string is 8 bytes
     
-    def __init__(self, sk:int = None):
-        logging.info('Initialize a FileQrcoder instance')
+    def __init__(self, qrcode_version:int=40, qrcode_error_correct:str='L', qrcode_box_size:int=4, sk:int=None):
+        logging.info(f'Initialize a FileQrcoder instance. qrcode_version = {qrcode_version}, qrcode_error_correct = {qrcode_error_correct}, sk={sk}')
+        self.qrcode_version = qrcode_version
+        self.qrcode_error_correct = ERROR_CORRECT_MAP[qrcode_error_correct]
+        self.qrcode_capacity = QRCODE_VERSIONS[qrcode_version][qrcode_error_correct]
+        self.qrcode_box_size = qrcode_box_size
         return
-        
+
     # generate base64 symbol table
     def gen_base64_symbols(self):
         return [chr(ord('A')+i) for i in range(26)] + [chr(ord('a')+i) for i in range(26)] + [chr(ord('0')+i) for i in range(10)] + ['+', '/']
@@ -46,7 +100,7 @@ class FileQrcoder:
             replace_table = self.gen_replace_table()
             encrypted_base64_str = self.encrypt_base64_str(base64_str, replace_table)
             logging.debug(f'encrypted base64 string = {encrypted_base64_str}')
-            
+        
         return base64_str
     
     # encrypt base64 string with 'replace table'
@@ -55,12 +109,12 @@ class FileQrcoder:
     
     # generate one QR code for a given string
     def gen_qrcode(self, data:str):
-        if len(data) > self.QR_CODE_CAPATITY_BYTES:
-            raise f"len(data) = {len(data)} != QR_CODE_CAPATITY_BYTES = {self.QR_CODE_CAPATITY_BYTES}"
+        if len(data) > self.qrcode_capacity:
+            raise f"len(data) = {len(data)} != qrcode_capacity = {self.qrcode_capacity}"
         qr = qrcode.QRCode(
-            version=self.QR_CODE_VERSION,
-            error_correction=self.QR_CODE_ERROR_CORRECT,
-            box_size=3,  # each pixel size which is default by 1
+            version=self.qrcode_version,
+            error_correction=self.qrcode_error_correct,
+            box_size=self.qrcode_box_size,  # each pixel size which is default by 1
             border=4,  # frame width which is default by 4
         )
         qr.add_data(data) # add data
@@ -68,16 +122,16 @@ class FileQrcoder:
         img = qr.make_image(fill_color="black", back_color="white") # create QR code image
         return img
     
-    # put an index (INDEX_LENGTH bytes) in the front of each slice of base64 string
+    # put an index (index_len bytes) in the front of each slice of base64 string
     def embed_index(self, base64_str:str):
-        slice_len = self.QR_CODE_CAPATITY_BYTES - self.INDEX_LENGTH
+        slice_len = self.qrcode_capacity - self.index_len
         slice_num = math.ceil(len(base64_str) / slice_len)
         logging.debug(f'slice_num = {slice_num}')
         r = ''
         for i in range(slice_num):
             start = i*slice_len
             end = min((i+1)*slice_len, len(base64_str))
-            r += (str(i).zfill(self.INDEX_LENGTH)+base64_str[start:end])
+            r += (str(i).zfill(self.index_len)+base64_str[start:end])
         return r
 
     # generate QR codes for the given file, and put the resulting QR code images in 'qrcodes_dir'
@@ -96,15 +150,15 @@ class FileQrcoder:
         base64_str = self.file_to_base64_str()
         data = self.embed_index(base64_str)
         logging.debug(f'data = {data}')
-        num = math.ceil(len(data) / self.QR_CODE_CAPATITY_BYTES)
+        num = math.ceil(len(data) / self.qrcode_capacity)
         img_paths = [] # all paths of the resulting QR code images
         for i in range(num):
-            start = i*self.QR_CODE_CAPATITY_BYTES
-            end = min((i+1)*self.QR_CODE_CAPATITY_BYTES, len(data))
+            start = i*self.qrcode_capacity
+            end = min((i+1)*self.qrcode_capacity, len(data))
             logging.info(f'generate {i} / {num}, {round((end-start) / 1024 / (4/3), 3)} KB')
             slice_str = data[start:end]
             logging.debug(f'slice_str = {slice_str}')
-            img_path = f"{self.qrcodes_dir}qrcode_{str(i).zfill(self.INDEX_LENGTH)}.png"
+            img_path = f"{self.qrcodes_dir}qrcode_{str(i).zfill(self.index_len)}.png"
             logging.debug(f'img_path = {img_path}')
             img = self.gen_qrcode(slice_str)
             img.save(img_path)
@@ -151,13 +205,13 @@ class FileQrcoder:
             decoded_objects = pyzbar.decode(image)
             for obj in decoded_objects:
                 content = obj.data.decode("utf-8")
-                idx = content[:self.INDEX_LENGTH]
+                idx = content[:self.index_len]
                 logging.info(f'recover {i} / {len(qrcode_imgs)}, {round((len(content)) / 1024 / (4/3), 3)} KB, idx = {idx}, img path = {qrcode_imgs[i]}')
                 try:
-                    slice_id = int(content[:self.INDEX_LENGTH])
+                    slice_id = int(content[:self.index_len])
                 except:
                     raise f'The content of {qrcode_imgs[i]} is invalid'
-                all_slices[slice_id] = content[self.INDEX_LENGTH:]
+                all_slices[slice_id] = content[self.index_len:]
             
         content = self.concat_all_slices(all_slices)
         base64_str = content
