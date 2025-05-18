@@ -4,10 +4,28 @@ import logging
 import os
 import qrcode
 import colorsys
+import subprocess
 
 # log setting
 logging.basicConfig(format='%(asctime)s.%(msecs)03d [%(levelname)s] [%(filename)s:%(lineno)d] %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S', level=logging.DEBUG)
+
+# convert images in the same directory into a video
+def imgs_to_video(in_dir:str, pattern:str="qrcode_%08d.png", outfile:str='out.mp4', fps:int=15):
+    try:
+        subprocess.run(["ffmpeg", "-version"], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    except:
+        raise Exception("NOT FOUND FFMPEG")
+    # construct ffmpeg cmd
+    cmd = ["ffmpeg", "-framerate", str(fps),
+        "-i", os.path.join(in_dir, pattern),
+        "-c:v", "libx264",
+        "-pix_fmt", "yuv420p",
+        "-y",  # cover existing file
+        outfile]
+    print(f'cmd = {cmd}')
+    subprocess.run(cmd, check=True)
+    return
 
 def heic_to_png(heic_path:str, png_path:str, quality:int=100):
     import heic2png
