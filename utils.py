@@ -19,7 +19,7 @@ def extract_frames(mov_file:str, outdir:str):
     subprocess.run(ffmpeg_cmd, check=True)
     # read frames
     cap = cv2.VideoCapture(tmp_mp4)  
-    frame_count = cap.get(cv2.CAP_PROP_FRAME_COUNT)
+    frame_count = math.ceil(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     i = 0
     while cap.isOpened():
         ret, frame = cap.read()

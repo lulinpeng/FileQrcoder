@@ -200,13 +200,15 @@ class FileQrcoder:
         from PIL import Image
         all_slices = {}
         for i in range(len(qrcode_imgs)):
-            print(f' i = {i}')
+            print(f'recover {i} / {len(qrcode_imgs)}')
             image = Image.open(qrcode_imgs[i])
             decoded_objects = pyzbar.decode(image)
+            if len(decoded_objects) == 0:
+                print(f'no qr code inside {i}-th image')
             for obj in decoded_objects:
                 content = obj.data.decode("utf-8")
                 idx = content[:self.index_len]
-                logging.info(f'recover {i} / {len(qrcode_imgs)}, {round((len(content)) / 1024 / (4/3), 3)} KB, idx = {idx}, img path = {qrcode_imgs[i]}')
+                print(f'recover {i} / {len(qrcode_imgs)}, {round((len(content)) / 1024 / (4/3), 3)} KB, idx = {idx}, img path = {qrcode_imgs[i]}')
                 try:
                     slice_id = int(content[:self.index_len])
                 except:
