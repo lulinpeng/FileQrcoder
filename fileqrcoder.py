@@ -195,7 +195,7 @@ class FileQrcoder:
             f.write(decoded_bytes)
             
     # recover a file from the given list of QR Code images
-    def recover_file_from_qrcodes(self, qrcode_imgs:list, sk:int = None, outfile:str = './recovered_file'):
+    def recover_file_from_qrcodes(self, qrcode_imgs:list, outfile:str = './recovered_file'):
         from pyzbar import pyzbar
         from PIL import Image
         all_slices = {}
@@ -215,7 +215,7 @@ class FileQrcoder:
             
         content = self.concat_all_slices(all_slices)
         base64_str = content
-        if sk is not None:
+        if self.sk is not None:
             base64_str = content
         self.base64_str_to_file(base64_str, outfile)
         return outfile
