@@ -4,7 +4,7 @@ import argparse
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Images to video')
     parser.add_argument('--in_dir', type=str, default='qrcodes',
-                       help='input directory of images')
+                       help='directory of your images')
     parser.add_argument('--pattern', type=str, default='qrcode_%08d.png',
                        help='image name pattern for FFMPEG')
     parser.add_argument('--outfile', type=str, default='out.mp4',
