@@ -72,6 +72,7 @@ class FileQrcoder:
         self.qrcode_error_correct = ERROR_CORRECT_MAP[qrcode_error_correct]
         self.qrcode_capacity = QRCODE_VERSIONS[qrcode_version][qrcode_error_correct]
         self.qrcode_box_size = qrcode_box_size
+        self.sk = sk
         return
 
     # generate base64 symbol table
@@ -135,14 +136,13 @@ class FileQrcoder:
         return r
 
     # generate QR codes for the given file, and put the resulting QR code images in 'qrcodes_dir'
-    def gen_qrcodes_from_file(self, infile:str, qrcodes_dir:str = './qrcodes/', sk:int = None):
+    def gen_qrcodes_from_file(self, infile:str, qrcodes_dir:str = './qrcodes/', id:str=''):
         '''
         Generate QR codes for the given file, and put the resulting QR code images in 'qrcodes_dir'
           'infile': the input file path
           'sk': it is used as secret key enhance privacy, and is None by default
           'qrcodes_dir': the directory for storing all resulting QR code images
         '''
-        self.sk = sk
         self.infile = infile
         self.qrcodes_dir = qrcodes_dir
         os.makedirs(qrcodes_dir, exist_ok=True)
@@ -158,7 +158,7 @@ class FileQrcoder:
             logging.info(f'generate {i} / {num}, {round((end-start) / 1024 / (4/3), 3)} KB')
             slice_str = data[start:end]
             logging.debug(f'slice_str = {slice_str}')
-            img_path = f"{self.qrcodes_dir}qrcode_{str(i).zfill(self.index_len)}.png"
+            img_path = f"{self.qrcodes_dir}{id}qrcode_{str(i).zfill(self.index_len)}.png"
             logging.debug(f'img_path = {img_path}')
             img = self.gen_qrcode(slice_str)
             img.save(img_path)
