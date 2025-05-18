@@ -111,7 +111,7 @@ class FileQrcoder:
     # generate one QR code for a given string
     def gen_qrcode(self, data:str):
         if len(data) > self.qrcode_capacity:
-            raise f"len(data) = {len(data)} != qrcode_capacity = {self.qrcode_capacity}"
+            raise BaseException(f"len(data) = {len(data)} != qrcode_capacity = {self.qrcode_capacity}")
         qr = qrcode.QRCode(
             version=self.qrcode_version,
             error_correction=self.qrcode_error_correct,
@@ -170,12 +170,12 @@ class FileQrcoder:
         min_slice_id = min(slice_ids)
         if min_slice_id != 0:
             logging.error(f'min_slice_id = {min_slice_id} != 0')
-            raise 'min_slice_id != 0'
+            raise BaseException('min_slice_id != 0')
         max_slice_id = max(slice_ids)
         for i in range(max_slice_id+1):
             if i not in slice_ids:
                 logging.error(f'the {i}-th slice is missing')
-                raise 'some slice is missing'
+                raise BaseException('some slice is missing')
         return
     
     def concat_all_slices(self, all_slices:dict):
@@ -210,7 +210,7 @@ class FileQrcoder:
                 try:
                     slice_id = int(content[:self.index_len])
                 except:
-                    raise f'The content of {qrcode_imgs[i]} is invalid'
+                    raise BaseException(f'The content of {qrcode_imgs[i]} is invalid')
                 all_slices[slice_id] = content[self.index_len:]
             
         content = self.concat_all_slices(all_slices)

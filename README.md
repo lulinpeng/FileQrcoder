@@ -29,6 +29,7 @@ python3 demo/display_qrcodes.py # display the above QR code images
 ```
 
 ## Try Your File
+### Image version
 ```shell
 cd FileQrcoder/
 export PYTHONPATH="${PYTHONPATH}:${pwd}"
@@ -38,6 +39,27 @@ python3 demo/test_encode.py [PATH OF YOUR FILE] # generate QR code images for 'Y
 export DYLD_LIBRARY_PATH=/opt/homebrew/lib/ # for 'libzbar.dylib'
 python3 demo/test_decode.py
 ```
+### Video version
+```shell
+export DYLD_LIBRARY_PATH=/opt/homebrew/lib/
+
+cd FileQrcoder/
+export PYTHONPATH="${PYTHONPATH}:${pwd}"
+cd demo/
+
+# file -> images
+python3 test_encode.py --file ../fileqrcoder.py --qrcode_version 35
+
+# images -> video
+python3 test_video_encode.py --in_dir qrcodes
+
+# video -> images
+ python3 test_video_extract.py --infile video.MOV
+
+# images -> file
+python3 test_decode.py --indir video_result
+```
+
 
 # BENCHMARK
 Testing conducted on: **Apple MacBook Pro (13-inch, M1, 2020)**. Specs: Apple M1 chip (8-core CPU/GPU), 16GB RAM, macOS [Sequoia, 15.3.1] 

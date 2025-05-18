@@ -5,10 +5,34 @@ import os
 import qrcode
 import colorsys
 import subprocess
+import cv2
 
 # log setting
 logging.basicConfig(format='%(asctime)s.%(msecs)03d [%(levelname)s] [%(filename)s:%(lineno)d] %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S', level=logging.DEBUG)
+
+# extract all frames of a MOV video file into a directory named 'outdir'
+def extract_frames(mov_file:str, outdir:str):
+    os.makedirs(outdir, exist_ok=True)
+    tmp_mp4 = os.path.join(outdir, 'tmp.mp4')
+    ffmpeg_cmd = ['ffmpeg', '-i', mov_file, '-c:v', 'libx264', '-pix_fmt', 'yuv420p', tmp_mp4]
+    subprocess.run(ffmpeg_cmd, check=True)
+    # read frames
+    cap = cv2.VideoCapture(tmp_mp4)  
+    frame_count = cap.get(cv2.CAP_PROP_FRAME_COUNT)
+    i = 0
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if not ret:
+            break
+        path = os.path.join(outdir,f"frame_{i:08d}.png")
+        cv2.imwrite(path, frame)
+        i += 1
+        print(f'{i} / {frame_count}-th frame, {path}')
+    print(f'{mov_file}: fps={cap.get(cv2.CAP_PROP_FPS)}, frame count={frame_count}, width= {cap.get(cv2.CAP_PROP_FRAME_WIDTH)}, height={cap.get(cv2.CAP_PROP_FRAME_HEIGHT)}')
+    cap.release()
+    os.remove(tmp_mp4)
+    return
 
 # convert images in the same directory into a video
 def imgs_to_video(in_dir:str, pattern:str="qrcode_%08d.png", outfile:str='out.mp4', fps:int=15):
