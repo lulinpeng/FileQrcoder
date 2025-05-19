@@ -48,13 +48,13 @@ export PYTHONPATH="${PYTHONPATH}:${pwd}"
 cd demo/
 
 # file -> images
-python3 test_encode.py --file ../fileqrcoder.py --qrcode_version 35
+python3 test_encode.py --file ../fileqrcoder.py --qrcode_version 27
 
 # images -> video
 python3 test_video_encode.py --in_dir qrcodes
 
 # video -> images
- python3 test_video_extract.py --infile video.MOV
+python3 test_video_extract.py --infile video.MOV
 
 # images -> file
 python3 test_decode.py --indir video_result

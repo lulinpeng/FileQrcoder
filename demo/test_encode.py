@@ -8,7 +8,7 @@ if __name__ == '__main__':
                        help='file to be encoded')
     parser.add_argument('--sk', type=int, default=None,
                        help='secret key (a integer)')
-    parser.add_argument('--qrcode_version', type=int, default=40,
+    parser.add_argument('--qrcode_version', type=int, default=27,
                        help='qrcode version (1-40)')
     parser.add_argument('--qrcode_box_size', type=int, default=4,
                        help='number of pixels of “box” of QR code')
