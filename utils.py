@@ -11,14 +11,11 @@ import cv2
 logging.basicConfig(format='%(asctime)s.%(msecs)03d [%(levelname)s] [%(filename)s:%(lineno)d] %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S', level=logging.DEBUG)
 
-# extract all frames of a MOV video file into a directory named 'outdir'
-def extract_frames(mov_file:str, outdir:str):
+# extract all frames of a video file into a directory named 'outdir'
+def extract_frames(video_file:str, outdir:str):
     os.makedirs(outdir, exist_ok=True)
-    tmp_mp4 = os.path.join(outdir, 'tmp.mp4')
-    ffmpeg_cmd = ['ffmpeg', '-i', mov_file, '-c:v', 'libx264', '-pix_fmt', 'yuv420p', tmp_mp4]
-    subprocess.run(ffmpeg_cmd, check=True)
-    # read frames
-    cap = cv2.VideoCapture(tmp_mp4)  
+    # read all frames
+    cap = cv2.VideoCapture(video_file)  
     frame_count = math.ceil(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     i = 0
     while cap.isOpened():
@@ -29,9 +26,9 @@ def extract_frames(mov_file:str, outdir:str):
         cv2.imwrite(path, frame)
         i += 1
         print(f'{i} / {frame_count}-th frame, {path}')
-    print(f'{mov_file}: fps={cap.get(cv2.CAP_PROP_FPS)}, frame count={frame_count}, width= {cap.get(cv2.CAP_PROP_FRAME_WIDTH)}, height={cap.get(cv2.CAP_PROP_FRAME_HEIGHT)}')
+    print(f'{video_file}: fps={cap.get(cv2.CAP_PROP_FPS)}, frame count={frame_count}, width= {cap.get(cv2.CAP_PROP_FRAME_WIDTH)}, height={cap.get(cv2.CAP_PROP_FRAME_HEIGHT)}')
     cap.release()
-    os.remove(tmp_mp4)
+
     return
 
 # convert images in the same directory into a video
