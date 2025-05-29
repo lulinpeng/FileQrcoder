@@ -31,7 +31,7 @@ class VideoCutMerge:
             out_video = f'{title}.mp4'
             out_video = os.path.join(cut_dir, f'{title}.mp4')
             out_videos.append(out_video)
-            cmd = f"ffmpeg -ss {start} -to {end} -i {in_video} -c copy {out_video}"
+            cmd = f"ffmpeg -i {in_video} -ss {start} -to {end} -c copy {out_video}"
             status = os.system(cmd)
             print(f"{i}: Exit code: {status}")
         return out_videos
