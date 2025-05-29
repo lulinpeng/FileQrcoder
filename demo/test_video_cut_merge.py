@@ -13,6 +13,9 @@ class VideoCutMerge:
             lines = f.readlines()
         lines = lines[1:]
         for line in lines:
+            if line.startswith('#'):
+                print('skip the line which starts with special symbol')
+                continue
             print(line, line.split())
             fragment = tuple(line.split())
             self.fragments.append(fragment)
@@ -38,6 +41,9 @@ class VideoCutMerge:
 
     # merge a list of videos into a single video
     def merge(self, in_videos:list, title:str = 'merged_video.mp4', merge_dir:str='merge'):
+        if len(in_videos) <= 1:
+            print('no enough videos to be merged')
+            return
         os.makedirs(merge_dir, exist_ok=True)
         tmp = 'merge.txt'
         with open(tmp, 'w+') as f:

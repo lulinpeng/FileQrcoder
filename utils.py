@@ -11,6 +11,18 @@ import cv2
 logging.basicConfig(format='%(asctime)s.%(msecs)03d [%(levelname)s] [%(filename)s:%(lineno)d] %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S', level=logging.DEBUG)
 
+# flip an image horizontally or vertically
+def image_flip(in_img_path:str, out_img_path:str=None, direction:str='horizontal'):
+    assert(direction == 'horizontal' or direction == 'vertical')
+    in_img = cv2.imread(in_img_path)
+    flag = 0 if direction == 'horizontal' else 1
+    out_img = cv2.flip(in_img, flag)
+    format = in_img_path.split('.')[-1]
+    out_img_path = f'{in_img_path}.{direction}.{format}' if out_img_path is None else out_img_path
+    print(f'image_flip: {out_img_path}')
+    cv2.imwrite(out_img_path, out_img)
+    return 
+
 # extract all frames of a video file into a directory named 'outdir'
 def extract_frames(video_file:str, outdir:str):
     os.makedirs(outdir, exist_ok=True)
