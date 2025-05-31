@@ -6,6 +6,13 @@ class VideoCutMerge:
         self.clear()
         pass
     
+    # convert *.rmvb into *.mp4
+    def rmvb_to_mp4(self, in_video:str, out_video:str='output.rmvb'):
+        cmd = f'ffmpeg -i {in_video} -c:v libx264 -c:a aac {out_video}'
+        status = os.system(cmd)
+        print(f"Exit code: {status}")
+        return
+
     # load details of cutting task
     def load_cut_task(self, task_path:str):
         self.fragments = []
