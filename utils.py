@@ -48,6 +48,13 @@ def extract_frames(video_file:str, outdir:str):
 
     return
 
+# evaluate the total running time of video which is going to be generate from the given images
+def evaluate_video_total_running_time(img_dir:str, fps:int):
+    images_cnt = len(os.listdir(img_dir))
+    trt = round(images_cnt/fps)
+    print(f'video trt: {trt} seconds')
+    return trt
+
 # convert images in the same directory into a video
 def imgs_to_video(in_dir:str, pattern:str="qrcode_%08d.png", outfile:str='out.mp4', fps:int=15):
     try:
