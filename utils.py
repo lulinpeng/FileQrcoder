@@ -56,7 +56,7 @@ def evaluate_video_total_running_time(img_dir:str, fps:int):
     return trt
 
 # convert images in the same directory into a video
-def imgs_to_video(in_dir:str, pattern:str="qrcode_%08d.png", outfile:str='out', fps:int=15):
+def imgs_to_video(in_dir:str, pattern:str="qrcode_%05d.png", outfile:str='out', fps:int=15):
     try:
         subprocess.run(["ffmpeg", "-version"], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     except:

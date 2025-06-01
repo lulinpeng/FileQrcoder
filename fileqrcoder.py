@@ -4,6 +4,8 @@ import logging
 import math
 import random
 import os
+import json
+import time
 
 # log setting
 logging.basicConfig(format='%(asctime)s.%(msecs)03d [%(levelname)s] [%(filename)s:%(lineno)d] %(message)s',
@@ -64,7 +66,8 @@ class FileQrcoder:
     qrcode_version:int = None  # QR code version，1-40, more version, more information, and larger QR code
     qrcode_box_size:int = None # each pixel size which is default by 1
     qrcode_error_correct:int = None  # fault tolerance, L(7%)，M(15%)，Q(25%)，H(30%)
-    index_len = 8 # index length of slice of base64 string is 8 bytes
+    index_len = 5 # index length of slice of base64 string is 8 bytes
+    max_index_len = 5 # index length of max slice number
     
     def __init__(self, qrcode_version:int=40, qrcode_error_correct:str='L', qrcode_box_size:int=4, sk:int=None):
         logging.info(f'Initialize a FileQrcoder instance. qrcode_version = {qrcode_version}, qrcode_error_correct = {qrcode_error_correct}, sk={sk}')
@@ -125,14 +128,14 @@ class FileQrcoder:
     
     # put an index (index_len bytes) in the front of each slice of base64 string
     def embed_index(self, base64_str:str):
-        slice_len = self.qrcode_capacity - self.index_len
+        slice_len = self.qrcode_capacity - self.index_len - self.max_index_len
         slice_num = math.ceil(len(base64_str) / slice_len)
         logging.debug(f'slice_num = {slice_num}')
         r = ''
         for i in range(slice_num):
             start = i*slice_len
             end = min((i+1)*slice_len, len(base64_str))
-            r += (str(i).zfill(self.index_len)+base64_str[start:end])
+            r += f'{str(i).zfill(self.index_len)}{str(slice_num).zfill(self.max_index_len)}{base64_str[start:end]}'
         return r
 
     # generate QR codes for the given file, and put the resulting QR code images in 'qrcodes_dir'
@@ -166,26 +169,27 @@ class FileQrcoder:
 
         return img_paths
         
-    def check_slice_ids(self, slice_ids:list):
-        min_slice_id = min(slice_ids)
-        if min_slice_id != 0:
-            logging.error(f'min_slice_id = {min_slice_id} != 0')
-            raise BaseException('min_slice_id != 0')
-        max_slice_id = max(slice_ids)
-        for i in range(max_slice_id+1):
-            if i not in slice_ids:
-                logging.error(f'the {i}-th slice is missing')
-                raise BaseException('some slice is missing')
-        return
+    def check_slice_ids(self, all_slices:dict):
+        max_slice_id = all_slices['max_slice_id']
+        missed_slice_id = []
+        for i in range(max_slice_id):
+            if i not in all_slices:
+                missed_slice_id.append(i)
+
+        if len(missed_slice_id) > 0:
+            logging.error(f'missed {len(missed_slice_id)} slices')
+            with open('missed_slices_id.txt', 'w') as f:
+                f.write(str(missed_slice_id))
+            return False
+        return True
     
     def concat_all_slices(self, all_slices:dict):
-        slice_ids = list(all_slices.keys())
-        logging.debug(f'all slice ids are {slice_ids}')
-        self.check_slice_ids(slice_ids)
-        max_slice_id = max(slice_ids)
+        max_slice_id =  all_slices['max_slice_id']
         content = ''
-        for i in range(max_slice_id+1):
-            content += all_slices[i]
+        header_len = self.index_len+self.max_index_len
+        for i in range(max_slice_id):
+            print(f'concating {i} / {max_slice_id} slice')
+            content += all_slices[i][header_len:]
         return content
     
     # convert the given base64 string into bytes array, and wirte the array to file
@@ -200,23 +204,33 @@ class FileQrcoder:
         from PIL import Image
         all_slices = {}
         for i in range(len(qrcode_imgs)):
-            print(f'recover {i} / {len(qrcode_imgs)}')
+            print(f'recover {i} / {len(qrcode_imgs)}, {qrcode_imgs[i]}')
             image = Image.open(qrcode_imgs[i])
             decoded_objects = pyzbar.decode(image)
             if len(decoded_objects) == 0:
                 print(f'no qr code inside {i}-th image')
+                continue
             for obj in decoded_objects:
                 content = obj.data.decode("utf-8")
+                print(f'content = {content}')
                 idx = content[:self.index_len]
+                max_idx = int(content[self.index_len:(self.index_len + self.max_index_len)])
                 print(f'recover {i} / {len(qrcode_imgs)}, {round((len(content)) / 1024 / (4/3), 3)} KB, idx = {idx}, img path = {qrcode_imgs[i]}')
                 try:
                     slice_id = int(content[:self.index_len])
                 except:
                     raise BaseException(f'The content of {qrcode_imgs[i]} is invalid')
-                all_slices[slice_id] = content[self.index_len:]
-            
+                all_slices[slice_id] = content
+        # save resolved slices
+        all_slices['max_slice_id'] = max_idx
+        slices_json_file = f"{outfile}.{time.strftime('%Y_%m_%d_%H_%M_%S')}.slices.json"
+        with open(slices_json_file, 'w') as f:
+            json.dump(all_slices, f)
+        if self.check_slice_ids(all_slices) == False:
+            raise BaseException(f'Some slices are missed !')
         content = self.concat_all_slices(all_slices)
         base64_str = content
+        print(f'base64_str = {base64_str}')
         if self.sk is not None:
             base64_str = content
         self.base64_str_to_file(base64_str, outfile)
