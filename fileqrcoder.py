@@ -212,7 +212,6 @@ class FileQrcoder:
                 continue
             for obj in decoded_objects:
                 content = obj.data.decode("utf-8")
-                print(f'content = {content}')
                 idx = content[:self.index_len]
                 max_idx = int(content[self.index_len:(self.index_len + self.max_index_len)])
                 print(f'recover {i} / {len(qrcode_imgs)}, {round((len(content)) / 1024 / (4/3), 3)} KB, idx = {idx}, img path = {qrcode_imgs[i]}')
@@ -230,7 +229,6 @@ class FileQrcoder:
             raise BaseException(f'Some slices are missed !')
         content = self.concat_all_slices(all_slices)
         base64_str = content
-        print(f'base64_str = {base64_str}')
         if self.sk is not None:
             base64_str = content
         self.base64_str_to_file(base64_str, outfile)
