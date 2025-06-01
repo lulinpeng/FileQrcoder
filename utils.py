@@ -6,11 +6,16 @@ import qrcode
 import colorsys
 import subprocess
 import cv2
+import sys
 
 # log setting
 logging.basicConfig(format='%(asctime)s.%(msecs)03d [%(levelname)s] [%(filename)s:%(lineno)d] %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S', level=logging.DEBUG)
 
+ 
+def is_macos():
+    return sys.platform == "darwin"
+ 
 # flip an image horizontally or vertically
 def image_flip(in_img_path:str, out_img_path:str=None, direction:str='horizontal'):
     assert(direction == 'horizontal' or direction == 'vertical')

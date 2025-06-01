@@ -1,4 +1,5 @@
 import os
+import utils
 
 class VideoCutMerge:
     fragments:list = None
@@ -9,6 +10,8 @@ class VideoCutMerge:
     # convert *.rmvb into *.mp4
     def rmvb_to_mp4(self, in_video:str, out_video:str='output.rmvb'):
         cmd = f'ffmpeg -i {in_video} -c:v libx264 -c:a aac {out_video}'
+        if utils.is_macos():
+            cmd = f'ffmpeg -hwaccel auto -i {in_video} -c:v h264_videotoolbox -c:a aac {out_video}'
         status = os.system(cmd)
         print(f"Exit code: {status}")
         return
