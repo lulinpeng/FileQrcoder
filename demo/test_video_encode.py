@@ -8,7 +8,7 @@ if __name__ == "__main__":
                        help='directory of your images')
     parser.add_argument('--pattern', type=str, default='qrcode_%08d.png',
                        help='image name pattern for FFMPEG')
-    parser.add_argument('--outfile', type=str, default='out.mp4',
+    parser.add_argument('--outfile', type=str, default='out',
                        help='name of output video')
     parser.add_argument('--fps', type=int, default=15,
                        help='frames per second')
