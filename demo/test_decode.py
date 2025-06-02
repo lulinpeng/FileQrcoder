@@ -1,6 +1,7 @@
 from fileqrcoder import FileQrcoder
 import os
 import argparse
+import utils
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Recover a file from the given list of images containing QR codes')
@@ -15,6 +16,12 @@ if __name__ == '__main__':
     print(f'indir = {args.indir}, outfile = {args.outfile}, sk = {args.sk}\n')
     qrcodes = os.listdir(args.indir) # get all qrcode images
     qrcodes = [os.path.join(args.indir, qrcode) for qrcode in qrcodes]
+    for i in range(len(qrcodes)):
+        if qrcodes[i][-5:] == '.HEIC':
+            png_qrcode = f'{qrcodes[i][:-5]}.png'
+            utils.heic_to_png(qrcodes[i], png_qrcode)
+            qrcodes[i] = png_qrcode
+    print(qrcodes)
     fq_decode = FileQrcoder(sk=args.sk)
     slices = fq_decode.recover_slices_from_qrcodes(qrcodes, report='report.json')
     if len(slices['missed_slice_ids']) == 0:

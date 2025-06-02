@@ -204,6 +204,7 @@ class FileQrcoder:
         for i in range(len(qrcode_imgs)):
             print(f'recover {i} / {len(qrcode_imgs)}, {qrcode_imgs[i]}')
             image = Image.open(qrcode_imgs[i])
+            
             decoded_objects = pyzbar.decode(image)
             if len(decoded_objects) == 0:
                 print(f'no qr code inside {i}-th image')

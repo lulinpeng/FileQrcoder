@@ -55,21 +55,28 @@ def evaluate_video_total_running_time(img_dir:str, fps:int):
     print(f'video trt: {trt} seconds')
     return trt
 
-# convert images in the same directory into a video
-def imgs_to_video(in_dir:str, pattern:str="qrcode_%05d.png", outfile:str='out', fps:int=15):
+# convert images into a video
+def imgs_to_video(images:list, outfile:str='out', fps:int=15):
     try:
         subprocess.run(["ffmpeg", "-version"], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     except:
         raise Exception("NOT FOUND FFMPEG")
-    img_cnt = len(os.listdir(in_dir))
+    images = sorted(images)
+    images_txt = 'images.txt'
+    with open(images_txt, 'w') as f:
+        for image in images:
+            f.write(f'file {image}\n')
+    img_cnt = len(images)
     outfile += f'.{img_cnt}.mp4'
     # construct ffmpeg cmd
-    cmd = ["ffmpeg", "-framerate", str(fps),
-        "-i", os.path.join(in_dir, pattern),
-        "-c:v", "libx264",
-        "-pix_fmt", "yuv420p",
-        "-y",  # cover existing file
-        outfile]
+    cmd = ["ffmpeg", "-r", str(fps),
+           "-f", "concat",
+           "-safe", "0",
+            "-i", images_txt,
+            "-c:v", "libx264",
+            "-pix_fmt", "yuv420p",
+            "-y",  # cover existing file
+            outfile]
     print(f'cmd = {cmd}')
     subprocess.run(cmd, check=True)
     return

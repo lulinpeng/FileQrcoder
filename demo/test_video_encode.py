@@ -1,6 +1,7 @@
 import utils
 import argparse
 import sys
+import os
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Images to video')
@@ -19,4 +20,6 @@ if __name__ == "__main__":
         user_input = input('The video longer than 2 minutes, do you still want to proceed? ').strip()
         if user_input == 'N' or user_input == "n":
             sys.exit()
-    utils.imgs_to_video(in_dir=args.in_dir, pattern=args.pattern, outfile=args.outfile, fps=args.fps)
+    images = os.listdir(args.in_dir)
+    images = [os.path.join(args.in_dir, image) for image in images]
+    utils.imgs_to_video(images, outfile=args.outfile, fps=args.fps)
