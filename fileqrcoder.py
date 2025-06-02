@@ -131,12 +131,13 @@ class FileQrcoder:
         slice_len = self.qrcode_capacity - self.index_len - self.max_index_len
         slice_num = math.ceil(len(base64_str) / slice_len)
         logging.debug(f'slice_num = {slice_num}')
-        if slice_num >= (1 << self.max_index_len):
-            raise BaseException(f'slice num = {slice_num} should be less than self.max_index_len = {self.max_index_len}')
+        max_slice_id = int('9'*self.max_index_len)
+        if slice_num >= max_slice_id:
+            raise BaseException(f'slice num = {slice_num} should be less than max_slice_id = {max_slice_id}')
         r = ''
         for i in range(slice_num):
-            start = i*slice_len
-            end = min((i+1)*slice_len, len(base64_str))
+            start = i * slice_len
+            end = min((i + 1) * slice_len, len(base64_str))
             r += f'{str(i).zfill(self.index_len)}{str(slice_num).zfill(self.max_index_len)}{base64_str[start:end]}'
         return r
 
