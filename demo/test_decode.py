@@ -2,7 +2,7 @@ from fileqrcoder import FileQrcoder
 import os
 import argparse
 import utils
-
+            
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Recover a file from the given list of images containing QR codes')
     parser.add_argument('--indir', type=str, default='qrcodes/',
@@ -24,6 +24,10 @@ if __name__ == '__main__':
     print(qrcodes)
     fq_decode = FileQrcoder(sk=args.sk)
     slices = fq_decode.recover_slices_from_qrcodes(qrcodes, report='report.json')
+
+    reports = ['report.json', 'report.bak.json']
+    slices = fq_decode.merge_slice_report(reports)
+    print(slices['missed_slice_ids'])
     if len(slices['missed_slice_ids']) == 0:
         fq_decode.recover_file_from_slices(slices, args.outfile)
         print(f'output file ={args.outfile}')

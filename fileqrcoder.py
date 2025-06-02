@@ -186,7 +186,7 @@ class FileQrcoder:
         header_len = self.index_len+self.max_index_len
         for i in range(max_slice_id):
             print(f'concating {i} / {max_slice_id} slice')
-            content += all_slices[i][header_len:]
+            content += all_slices[str(i)][header_len:]
         return content
     
     # convert the given base64 string into bytes array, and wirte the array to file
@@ -235,3 +235,16 @@ class FileQrcoder:
             base64_str = content
         self.base64_str_to_file(base64_str, outfile)
         return
+
+    def merge_slice_report(self, reports:list):
+        slices = {}
+        for report in reports:
+            with open(report) as f:
+                slices.update(json.load(f))
+        max_slice_id = slices['max_slice_id']
+        missed_slice_ids = []
+        for i in range(max_slice_id):
+            if str(i) not in slices:
+                missed_slice_ids.append(i)
+        slices['missed_slice_ids'] = missed_slice_ids
+        return slices
