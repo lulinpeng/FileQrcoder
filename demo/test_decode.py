@@ -16,5 +16,7 @@ if __name__ == '__main__':
     qrcodes = os.listdir(args.indir) # get all qrcode images
     qrcodes = [os.path.join(args.indir, qrcode) for qrcode in qrcodes]
     fq_decode = FileQrcoder(sk=args.sk)
-    fq_decode.recover_file_from_qrcodes(qrcodes, outfile=args.outfile)
-    print(f'output file ={args.outfile}')
+    slices = fq_decode.recover_slices_from_qrcodes(qrcodes, report='report.json')
+    if len(slices['missed_slice_ids']) == 0:
+        fq_decode.recover_file_from_slices(slices, args.outfile)
+        print(f'output file ={args.outfile}')

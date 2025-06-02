@@ -171,19 +171,13 @@ class FileQrcoder:
 
         return img_paths
         
-    def check_slice_ids(self, all_slices:dict):
+    def find_missed_slices(self, all_slices:dict):
         max_slice_id = all_slices['max_slice_id']
-        missed_slice_id = []
+        missed_slice_ids = []
         for i in range(max_slice_id):
             if i not in all_slices:
-                missed_slice_id.append(i)
-
-        if len(missed_slice_id) > 0:
-            logging.error(f'missed {len(missed_slice_id)} slices')
-            with open('missed_slices_id.txt', 'w') as f:
-                f.write(str(missed_slice_id))
-            return False
-        return True
+                missed_slice_ids.append(i)
+        return missed_slice_ids
     
     def concat_all_slices(self, all_slices:dict):
         max_slice_id =  all_slices['max_slice_id']
@@ -201,7 +195,8 @@ class FileQrcoder:
             f.write(decoded_bytes)
             
     # recover a file from the given list of QR Code images
-    def recover_file_from_qrcodes(self, qrcode_imgs:list, outfile:str = './recovered_file'):
+    # def recover_slices_from_qrcodes(self, qrcode_imgs:list, outfile:str = './recovered_file'):
+    def recover_slices_from_qrcodes(self, qrcode_imgs:list, report:str = './report.json'):
         from pyzbar import pyzbar
         from PIL import Image
         all_slices = {}
@@ -224,14 +219,17 @@ class FileQrcoder:
                 all_slices[slice_id] = content
         # save resolved slices
         all_slices['max_slice_id'] = max_idx
-        slices_json_file = f"{outfile}.{time.strftime('%Y_%m_%d_%H_%M_%S')}.slices.json"
-        with open(slices_json_file, 'w') as f:
+        missed_slice_ids = self.find_missed_slices(all_slices)
+        all_slices['missed_slice_ids'] = missed_slice_ids
+        with open(report, 'w') as f:
             json.dump(all_slices, f)
-        if self.check_slice_ids(all_slices) == False:
-            raise BaseException(f'Some slices are missed !')
-        content = self.concat_all_slices(all_slices)
+        return all_slices
+    
+    # recover file from slices
+    def recover_file_from_slices(self, slices:dict, outfile='./outfile'):
+        content = self.concat_all_slices(slices)
         base64_str = content
         if self.sk is not None:
             base64_str = content
         self.base64_str_to_file(base64_str, outfile)
-        return outfile
+        return
