@@ -171,7 +171,8 @@ class FileQrcoder:
             img_paths.append(img_path)
 
         return img_paths
-        
+    
+    # return a list of ids of all missed slices
     def find_missed_slices(self, all_slices:dict):
         max_slice_id = all_slices['max_slice_id']
         missed_slice_ids = []
@@ -180,6 +181,7 @@ class FileQrcoder:
                 missed_slice_ids.append(i)
         return missed_slice_ids
     
+    # concatenate all slice information
     def concat_all_slices(self, all_slices:dict):
         max_slice_id =  all_slices['max_slice_id']
         content = ''
@@ -189,11 +191,12 @@ class FileQrcoder:
             content += all_slices[str(i)][header_len:]
         return content
     
-    # convert the given base64 string into bytes array, and wirte the array to file
+    # decode the given base64 string into bytes which is then written to file
     def base64_str_to_file(self, base64_str:str, outfile:str):
         decoded_bytes = base64.b64decode(base64_str)
         with open(outfile, 'wb') as f:
             f.write(decoded_bytes)
+        return
             
     # recover a file from the given list of QR Code images
     # def recover_slices_from_qrcodes(self, qrcode_imgs:list, outfile:str = './recovered_file'):
@@ -236,6 +239,7 @@ class FileQrcoder:
         self.base64_str_to_file(base64_str, outfile)
         return
 
+    # merge all slices reports, i.e., merge dictionaries
     def merge_slice_report(self, reports:list):
         slices = {}
         for report in reports:
