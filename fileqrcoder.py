@@ -187,7 +187,7 @@ class FileQrcoder:
         content = ''
         header_len = self.index_len+self.max_index_len
         for i in range(max_slice_id):
-            print(f'concating {i} / {max_slice_id} slice')
+            logging.debug(f'concating {i} / {max_slice_id} slice')
             content += all_slices[str(i)][header_len:]
         return content
     
@@ -205,18 +205,29 @@ class FileQrcoder:
         from PIL import Image
         all_slices = {}
         for i in range(len(qrcode_imgs)):
-            print(f'recover {i} / {len(qrcode_imgs)}, {qrcode_imgs[i]}')
+            logging.info(f'recover {i} / {len(qrcode_imgs)}, {qrcode_imgs[i]}')
             image = Image.open(qrcode_imgs[i])
             
             decoded_objects = pyzbar.decode(image)
             if len(decoded_objects) == 0:
-                print(f'no qr code inside {i}-th image')
+                logging.info(f'no qr code inside {i}-th image')
                 continue
             for obj in decoded_objects:
                 content = obj.data.decode("utf-8")
                 idx = content[:self.index_len]
-                max_idx = int(content[self.index_len:(self.index_len + self.max_index_len)])
-                print(f'recover {i} / {len(qrcode_imgs)}, {round((len(content)) / 1024 / (4/3), 3)} KB, idx = {idx}, img path = {qrcode_imgs[i]}')
+                try:
+                    max_idx = int(content[self.index_len:(self.index_len + self.max_index_len)])
+                    all_slices['max_slice_id'] = max_idx
+                except Exception as e:
+                    logging.error(f"exception detail = {e}, content = {content}")
+                    time_str = time.strftime('%m%d%H%M%S')
+                    tmp_report = f'{report}.{time_str}.tmp.json'
+                    with open(report + '.tmp.json', 'w') as f:
+                        json.dump(all_slices, f)
+                    logging.error(f'temp report is saved in file {tmp_report}')
+                    logging.error(f'skip {i}-th images {qrcode_imgs[i]}')
+                    continue
+                logging.info(f'recover {i} / {len(qrcode_imgs)}, {round((len(content)) / 1024 / (4/3), 3)} KB, idx = {idx}, img path = {qrcode_imgs[i]}')
                 try:
                     slice_id = int(content[:self.index_len])
                 except:

@@ -15,7 +15,9 @@ if __name__ == '__main__':
 
     print(f'indir = {args.indir}, outfile = {args.outfile}, sk = {args.sk}\n')
     qrcodes = os.listdir(args.indir) # get all qrcode images
+    qrcodes.sort()
     qrcodes = [os.path.join(args.indir, qrcode) for qrcode in qrcodes]
+
     for i in range(len(qrcodes)):
         if qrcodes[i][-5:] == '.HEIC':
             png_qrcode = f'{qrcodes[i][:-5]}.png'
