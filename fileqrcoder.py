@@ -175,9 +175,10 @@ class FileQrcoder:
     # return a list of ids of all missed slices
     def find_missed_slices(self, all_slices:dict):
         max_slice_id = all_slices['max_slice_id']
+        logging.debug(f'max_slice_id = {max_slice_id}')
         missed_slice_ids = []
         for i in range(max_slice_id):
-            if i not in all_slices:
+            if str(i) not in all_slices:
                 missed_slice_ids.append(i)
         return missed_slice_ids
     
