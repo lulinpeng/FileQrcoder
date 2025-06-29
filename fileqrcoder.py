@@ -6,6 +6,8 @@ import random
 import os
 import json
 import time
+import utils
+import multiprocessing
 
 # log setting
 logging.basicConfig(format='%(asctime)s.%(msecs)03d [%(levelname)s] [%(filename)s:%(lineno)d] %(message)s',
@@ -198,10 +200,30 @@ class FileQrcoder:
         with open(outfile, 'wb') as f:
             f.write(decoded_bytes)
         return
+    
+    def recover_slices_from_qrcodes_in_parallel(self, qrcodes:list, processes:int = None):
+        processes = os.cpu_count() if processes == None else processes
+        intervals = utils.split_range_equally(0, len(qrcodes), processes)
+        logging.info(f'intervals = {intervals}')
+        tasks = []
+        reports = []
+        for interval in intervals:
+            qrcodes_sub = qrcodes[interval[0]:interval[1]]
+            report = f'report_{utils.timestamp_str()}_{interval[0]}_{interval[1]}.json'
+            reports.append(report)
+            logging.info(f'{interval}: report_file = {report}')
+            task = multiprocessing.Process(target=self.recover_slices_from_qrcodes, args=(qrcodes_sub, report,))
+            tasks.append(task)
+            task.start()
             
+        for task in tasks:
+            task.join()
+        return reports
+    
     # recover a file from the given list of QR Code images
     # def recover_slices_from_qrcodes(self, qrcode_imgs:list, outfile:str = './recovered_file'):
     def recover_slices_from_qrcodes(self, qrcode_imgs:list, report:str = './report.json'):
+        print(f'recover_slices_from_qrcodes: len(qrcode_imgs) = {len(qrcode_imgs)}')
         from pyzbar import pyzbar
         from PIL import Image
         all_slices = {}
@@ -250,9 +272,22 @@ class FileQrcoder:
             base64_str = content
         self.base64_str_to_file(base64_str, outfile)
         return
+    
+    def recover_file_from_report(self, report:str='report.json', outfile='./outfile'):
+        with open(report) as f:
+            r = json.load(f)
+        missed_slice_ids = r['missed_slice_ids']
+        max_slice_id = r['max_slice_id']
+        if len(missed_slice_ids) > 0:
+            logging.error(f'{len(missed_slice_ids)} slices are missed (max slice id = {max_slice_id})')
+            return
+        self.recover_file_from_slices(r, outfile)
+        return
 
-    # merge all slices reports, i.e., merge dictionaries
-    def merge_slice_report(self, reports:list):
+    # merge all reports, i.e., merge all dictionaries
+    def merge_reports(self, reports:list):
+        merged_report = f'report_{utils.timestamp_str()}.json'
+        logging.info(f'merge reports: {reports} => {merged_report}')
         slices = {}
         for report in reports:
             with open(report) as f:
@@ -263,4 +298,6 @@ class FileQrcoder:
             if str(i) not in slices:
                 missed_slice_ids.append(i)
         slices['missed_slice_ids'] = missed_slice_ids
-        return slices
+        with open(merged_report, 'w') as f:
+            json.dump(slices, f)
+        return merged_report

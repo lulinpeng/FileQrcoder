@@ -7,12 +7,23 @@ import colorsys
 import subprocess
 import cv2
 import sys
+import datetime
 
 # log setting
 logging.basicConfig(format='%(asctime)s.%(msecs)03d [%(levelname)s] [%(filename)s:%(lineno)d] %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S', level=logging.DEBUG)
 
  
+def timestamp_str():
+    return datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+
+def split_range_equally(start:int, end:int, num_splits:int):
+    assert(end >= start)
+    step = (end - start) // num_splits
+    r = [[start + i*step, start + (i+1)*step] for i in range(num_splits)]
+    r[-1][-1] = end
+    return r
+
 def is_macos():
     return sys.platform == "darwin"
  

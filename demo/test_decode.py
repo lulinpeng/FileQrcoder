@@ -2,7 +2,8 @@ from fileqrcoder import FileQrcoder
 import os
 import argparse
 import utils
-            
+import json
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Recover a file from the given list of images containing QR codes')
     parser.add_argument('--indir', type=str, default='qrcodes/',
@@ -17,7 +18,7 @@ if __name__ == '__main__':
     qrcodes = os.listdir(args.indir) # get all qrcode images
     qrcodes.sort()
     qrcodes = [os.path.join(args.indir, qrcode) for qrcode in qrcodes]
-
+    qrcodes = qrcodes[1000:2000]
     for i in range(len(qrcodes)):
         if qrcodes[i][-5:] == '.HEIC':
             png_qrcode = f'{qrcodes[i][:-5]}.png'
@@ -25,11 +26,13 @@ if __name__ == '__main__':
             qrcodes[i] = png_qrcode
     print(qrcodes)
     fq_decode = FileQrcoder(sk=args.sk)
-    slices = fq_decode.recover_slices_from_qrcodes(qrcodes, report='report.json')
 
-    reports = ['report.json', 'report.bak.json']
-    slices = fq_decode.merge_slice_report(reports)
-    print(slices['missed_slice_ids'])
-    if len(slices['missed_slice_ids']) == 0:
-        fq_decode.recover_file_from_slices(slices, args.outfile)
-        print(f'output file ={args.outfile}')
+    reports = fq_decode.recover_slices_from_qrcodes_in_parallel(qrcodes)
+    print(f'reports = {reports}')
+
+    merged_report = fq_decode.merge_reports(reports)
+    print(f'merged_report = {merged_report}')
+
+    with open(merged_report) as f:
+        report = json.load(f)
+    fq_decode.recover_file_from_report(merged_report)
