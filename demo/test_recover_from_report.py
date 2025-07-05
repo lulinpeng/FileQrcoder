@@ -15,4 +15,5 @@ if __name__ == '__main__':
     args = parser.parse_args()
     print(f'report = {args.report}, outfile = {args.outfile}')
     fq = FileQrcoder(sk=args.sk)
-    fq.recover_file_from_report(args.report)
+    fq.recover_file_from_report(args.report, args.outfile)
+    print(f'report = {args.report}, outfile = {args.outfile}')
