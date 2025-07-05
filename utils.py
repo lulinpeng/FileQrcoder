@@ -91,7 +91,7 @@ def imgs_to_video(images:list, outfile:str='out', fps:int=15):
             outfile]
     print(f'cmd = {cmd}')
     subprocess.run(cmd, check=True)
-    return
+    return outfile
 
 def heic_to_png(heic_path:str, png_path:str, quality:int=100):
     import heic2png

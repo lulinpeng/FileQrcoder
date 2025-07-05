@@ -24,4 +24,5 @@ if __name__ == "__main__":
     images = [os.path.join(args.indir, image) for image in images]
     # image_ids = [116, 179, 195, 259]
     # images = [f'qrcodes/qrcode_{str(image_id).zfill(5)}.png' for image_id in image_ids]
-    utils.imgs_to_video(images, outfile=args.outfile, fps=args.fps)
+    outfile = utils.imgs_to_video(images, outfile=args.outfile, fps=args.fps)
+    print(f'output video {outfile}')
