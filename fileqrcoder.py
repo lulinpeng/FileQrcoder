@@ -143,34 +143,52 @@ class FileQrcoder:
             r += f'{str(i).zfill(self.index_len)}{str(slice_num).zfill(self.max_index_len)}{base64_str[start:end]}'
         return r
 
+    def gen_qrcodes_from_file(self, start_id:int, end_id:int, id:str):
+        for i in range(start_id, end_id):
+            start = i * self.qrcode_capacity
+            end = min((i + 1) * self.qrcode_capacity, len(self.data))
+            logging.info(f'generate {i - start_id}-th / {end_id - start_id} where range is [ {start_id, end_id}) and image id is {i}, {round((end-start) / 1024 / (4/3), 3)} KB')
+            slice_str = self.data[start:end]
+            logging.debug(f'slice_str = {slice_str}')
+            img_path = f"{self.qrcodes_dir}{id}qrcode_{str(i).zfill(self.index_len)}.png"
+            logging.debug(f'img_path = {img_path}')
+            img = self.gen_qrcode(slice_str)
+            img.save(img_path)
+        return
+    
     # generate QR codes for the given file, and put the resulting QR code images in 'qrcodes_dir'
-    def gen_qrcodes_from_file(self, infile:str, qrcodes_dir:str = './qrcodes/', id:str=''):
+    def gen_qrcodes_from_file_in_parallel(self, infile:str, qrcodes_dir:str = './qrcodes/', id:str='', processes:int = None):
         '''
         Generate QR codes for the given file, and put the resulting QR code images in 'qrcodes_dir'
           'infile': the input file path
           'sk': it is used as secret key enhance privacy, and is None by default
           'qrcodes_dir': the directory for storing all resulting QR code images
         '''
+        processes = os.cpu_count() if processes == None else processes
         self.infile = infile
         self.qrcodes_dir = qrcodes_dir
         os.makedirs(qrcodes_dir, exist_ok=True)
 
         base64_str = self.file_to_base64_str()
-        data = self.embed_index(base64_str)
-        logging.debug(f'data = {data}')
-        num = math.ceil(len(data) / self.qrcode_capacity)
-        img_paths = [] # all paths of the resulting QR code images
-        for i in range(num):
-            start = i*self.qrcode_capacity
-            end = min((i+1)*self.qrcode_capacity, len(data))
-            logging.info(f'generate {i} / {num}, {round((end-start) / 1024 / (4/3), 3)} KB')
-            slice_str = data[start:end]
-            logging.debug(f'slice_str = {slice_str}')
-            img_path = f"{self.qrcodes_dir}{id}qrcode_{str(i).zfill(self.index_len)}.png"
-            logging.debug(f'img_path = {img_path}')
-            img = self.gen_qrcode(slice_str)
-            img.save(img_path)
-            img_paths.append(img_path)
+        self.data = self.embed_index(base64_str)
+        logging.debug(f'data = {self.data}')
+        self.total_num_of_qrcodes = math.ceil(len(self.data) / self.qrcode_capacity)
+        logging.info(f'total number of qrcodes = {self.total_num_of_qrcodes}')
+        intervals = utils.split_range_equally(0, self.total_num_of_qrcodes, processes)
+        logging.info(f'intervals = {intervals}')
+
+        tasks = []
+        for interval in intervals:
+            logging.info(f'{interval}')
+            task = multiprocessing.Process(target=self.gen_qrcodes_from_file, args=(interval[0], interval[1], id, ))
+            tasks.append(task)
+            task.start()
+            
+        for task in tasks:
+            task.join()
+
+        # all paths of the resulting QR code images
+        img_paths = [f"{self.qrcodes_dir}{id}qrcode_{str(i).zfill(self.index_len)}.png" for i in range(self.total_num_of_qrcodes)]
 
         return img_paths
     

@@ -17,6 +17,7 @@ logging.basicConfig(format='%(asctime)s.%(msecs)03d [%(levelname)s] [%(filename)
 def timestamp_str():
     return datetime.datetime.now().strftime('%Y%m%d%H%M%S')
 
+# split range [start, end) into 'num_splits' sub-range equally
 def split_range_equally(start:int, end:int, num_splits:int):
     assert(end >= start)
     step = (end - start) // num_splits

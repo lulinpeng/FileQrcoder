@@ -18,5 +18,5 @@ if __name__ == '__main__':
 
     print(f'input file = {args.file}, sk = {args.sk}\n')
     fq_encode = FileQrcoder(qrcode_version=args.qrcode_version, qrcode_box_size=args.qrcode_box_size, sk=args.sk)
-    qrcode_img_paths = fq_encode.gen_qrcodes_from_file(args.file, id=args.id) 
+    qrcode_img_paths = fq_encode.gen_qrcodes_from_file_in_parallel(args.file, id=args.id) 
     print(qrcode_img_paths)
