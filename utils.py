@@ -13,7 +13,7 @@ import datetime
 logging.basicConfig(format='%(asctime)s.%(msecs)03d [%(levelname)s] [%(filename)s:%(lineno)d] %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S', level=logging.DEBUG)
 
- 
+# return a string of time stamp
 def timestamp_str():
     return datetime.datetime.now().strftime('%Y%m%d%H%M%S')
 

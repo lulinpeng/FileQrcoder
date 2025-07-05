@@ -225,28 +225,31 @@ class FileQrcoder:
         logging.info(f'intervals = {intervals}')
         tasks = []
         reports = []
+        i = 0
         for interval in intervals:
             qrcodes_sub = qrcodes[interval[0]:interval[1]]
             report = f'report_{utils.timestamp_str()}_{interval[0]}_{interval[1]}.json'
             reports.append(report)
             logging.info(f'{interval}: report_file = {report}')
-            task = multiprocessing.Process(target=self.recover_slices_from_qrcodes, args=(qrcodes_sub, report,))
+            task = multiprocessing.Process(target=self.recover_slices_from_qrcodes, args=(i, qrcodes_sub, report,))
             tasks.append(task)
             task.start()
+            i += 1
             
         for task in tasks:
             task.join()
+        logging.info(f'intervals = {intervals}')
         return reports
     
     # recover a file from the given list of QR Code images
     # def recover_slices_from_qrcodes(self, qrcode_imgs:list, outfile:str = './recovered_file'):
-    def recover_slices_from_qrcodes(self, qrcode_imgs:list, report:str = './report.json'):
+    def recover_slices_from_qrcodes(self, process_id:int, qrcode_imgs:list, report:str = './report.json'):
         print(f'recover_slices_from_qrcodes: len(qrcode_imgs) = {len(qrcode_imgs)}')
         from pyzbar import pyzbar
         from PIL import Image
         all_slices = {}
         for i in range(len(qrcode_imgs)):
-            logging.info(f'recover {i} / {len(qrcode_imgs)}, {qrcode_imgs[i]}')
+            logging.info(f'{process_id}-th process: recover {i} / {len(qrcode_imgs)}, {qrcode_imgs[i]}')
             image = Image.open(qrcode_imgs[i])
             
             decoded_objects = pyzbar.decode(image)
@@ -268,7 +271,7 @@ class FileQrcoder:
                     logging.error(f'temp report is saved in file {tmp_report}')
                     logging.error(f'skip {i}-th images {qrcode_imgs[i]}')
                     continue
-                logging.info(f'recover {i} / {len(qrcode_imgs)}, {round((len(content)) / 1024 / (4/3), 3)} KB, idx = {idx}, img path = {qrcode_imgs[i]}')
+                logging.info(f'{process_id}-th process: recover {i} / {len(qrcode_imgs)}, {round((len(content)) / 1024 / (4/3), 3)} KB, idx = {idx}, img path = {qrcode_imgs[i]}')
                 try:
                     slice_id = int(content[:self.index_len])
                 except:
@@ -292,12 +295,13 @@ class FileQrcoder:
         return
     
     def recover_file_from_report(self, report:str='report.json', outfile='./outfile'):
+        logging.info(f'report = {report}, outfile = {outfile}')
         with open(report) as f:
             r = json.load(f)
         missed_slice_ids = r['missed_slice_ids']
         max_slice_id = r['max_slice_id']
         if len(missed_slice_ids) > 0:
-            logging.error(f'{len(missed_slice_ids)} slices are missed (max slice id = {max_slice_id})')
+            logging.error(f'{len(missed_slice_ids)} slices are missed (max slice id = {max_slice_id}), miss rate is {round(len(missed_slice_ids)/max_slice_id * 100, 2)}%')
             return
         self.recover_file_from_slices(r, outfile)
         return
