@@ -51,7 +51,7 @@ cd demo/
 python3 test_encode.py --file ../fileqrcoder.py --qrcode_version 27
 
 # images -> video
-python3 test_video_encode.py --in_dir qrcodes
+python3 test_video_encode.py --indir qrcodes
 
 # video -> images
 python3 test_video_extract.py --infile video.MOV

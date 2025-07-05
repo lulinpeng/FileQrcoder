@@ -184,9 +184,9 @@ def extend_margin(x0:int, y0:int, x1:int, y1:int, margin_w:int, margin_h:int, w:
     logging.debug(f'extend_margin end: x0 = {x0}, y0 = {y0}, x1 = {x1}, y1 = {y1}, margin_w = {margin_w}, margin_y = {margin_w}, w = {w}, h = {h}')
     return x0, y0, x1, y1
 
-def split_image(image_paths:list, rows, cols, out_dir:str, margin:float = 0.2):
-    logging.debug(f'split_image: out_dir = {out_dir}')
-    os.makedirs(out_dir, exist_ok=True)
+def split_image(image_paths:list, rows, cols, outdir:str, margin:float = 0.2):
+    logging.debug(f'split_image: outdir = {outdir}')
+    os.makedirs(outdir, exist_ok=True)
     img = Image.open(image_paths[0])
     w, h = img.size # 获取图片的宽度和高度
     logging.debug(f'split_image: w = {w}, h = {h}')
@@ -205,15 +205,15 @@ def split_image(image_paths:list, rows, cols, out_dir:str, margin:float = 0.2):
                 x0, y0, x1, y1 = extend_margin(x0, y0, x1, y1, add_w, add_h, w, h)
                 
                 block_img = img.crop((x0, y0, x1, y1))
-                block_img.save(f'{out_dir}split_image_{str(k * cols * rows + i * cols + j).zfill(8)}.png')
+                block_img.save(f'{outdir}split_image_{str(k * cols * rows + i * cols + j).zfill(8)}.png')
                 images.append(block_img) # 切割图片并添加到列表中
             
     return images
 
 # concatenate the given images
-def concat_img(img_paths: list, row:int, col:int, out_dir="./concat/", interval:int = 0):
-    logging.debug(f'concat_img: out_dir = {out_dir}')
-    os.makedirs(out_dir, exist_ok=True)
+def concat_img(img_paths: list, row:int, col:int, outdir="./concat/", interval:int = 0):
+    logging.debug(f'concat_img: outdir = {outdir}')
+    os.makedirs(outdir, exist_ok=True)
     first_img = Image.open(img_paths[0])
     width, height = first_img.size
     logging.debug(f'width = {width}, height = {height}')
@@ -229,15 +229,15 @@ def concat_img(img_paths: list, row:int, col:int, out_dir="./concat/", interval:
                     logging.debug(f'img_paths[{idx}] = {img_paths[idx]}')
                     img = Image.open(img_paths[idx]).resize((width, height))
                     res_img.paste(img, box=((width+interval)*j , (height+interval)*i))
-        res_img_path = f'{out_dir}concat_qrcode_{str(k).zfill(8)}.png'
+        res_img_path = f'{outdir}concat_qrcode_{str(k).zfill(8)}.png'
         res_img.save(res_img_path)
         res_img_paths.append(res_img_path)
     return res_img_paths
 
 # concatenate images horizontally
-def horizontal_concat_img(img_paths: list, batch_size:int, interval:int = 0, out_dir="./horizontal/"):
-    logging.debug(f'out_dir = {out_dir}')
-    os.makedirs(out_dir, exist_ok=True)
+def horizontal_concat_img(img_paths: list, batch_size:int, interval:int = 0, outdir="./horizontal/"):
+    logging.debug(f'outdir = {outdir}')
+    os.makedirs(outdir, exist_ok=True)
     first_img = Image.open(img_paths[0])
     width, height = first_img.size
     logging.debug(f'width = {width}, height = {height}')
@@ -251,14 +251,14 @@ def horizontal_concat_img(img_paths: list, batch_size:int, interval:int = 0, out
                 logging.debug(f'img_paths[idx] = {img_paths[idx]}')
                 img = Image.open(img_paths[idx]).resize((width, height))
                 res_img.paste(img, box=((width+interval)*j , 0))
-        res_img_path = f'{out_dir}horizontal_concat_qrcode_{str(i).zfill(8)}.png'
+        res_img_path = f'{outdir}horizontal_concat_qrcode_{str(i).zfill(8)}.png'
         res_img.save(res_img_path)
         res_img_paths.append(res_img_path)
     return res_img_paths
 
 # concatenate images vertically
-def vertical_concat_img(img_paths: list, batch_size:int, interval:int = 0, out_dir="./vertical/"):
-    os.makedirs(out_dir, exist_ok=True)
+def vertical_concat_img(img_paths: list, batch_size:int, interval:int = 0, outdir="./vertical/"):
+    os.makedirs(outdir, exist_ok=True)
     first_img = Image.open(img_paths[0])
     width, height = first_img.size
     logging.debug(f'width = {width}, height = {height}')
@@ -272,7 +272,7 @@ def vertical_concat_img(img_paths: list, batch_size:int, interval:int = 0, out_d
                 logging.debug(f'img_paths[idx] = {img_paths[idx]}')
                 img = Image.open(img_paths[idx]).resize((width, height))
                 res_img.paste(img, box=(0 , (height+interval)*j))
-        res_img_path = f'{out_dir}vertical_concat_qrcode_{str(i).zfill(8)}.png'
+        res_img_path = f'{outdir}vertical_concat_qrcode_{str(i).zfill(8)}.png'
         res_img.save(res_img_path)
         res_img_paths.append(res_img_path)
     return res_img_paths
