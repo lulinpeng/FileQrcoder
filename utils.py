@@ -58,6 +58,7 @@ def extract_frames(video_file:str, outdir:str):
     print(f'{video_file}: fps={cap.get(cv2.CAP_PROP_FPS)}, frame count={frame_count}, width= {cap.get(cv2.CAP_PROP_FRAME_WIDTH)}, height={cap.get(cv2.CAP_PROP_FRAME_HEIGHT)}')
     cap.release()
 
+    print(f'outdir = {outdir}')
     return
 
 # evaluate the total running time of video which is going to be generate from the given images

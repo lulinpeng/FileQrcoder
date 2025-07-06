@@ -5,14 +5,9 @@ import os
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Images to video')
-    parser.add_argument('--indir', type=str, default='qrcodes',
-                       help='directory of your images')
-    parser.add_argument('--pattern', type=str, default='qrcode_%05d.png',
-                       help='image name pattern for FFMPEG')
-    parser.add_argument('--outfile', type=str, default='out',
-                       help='name of output video')
-    parser.add_argument('--fps', type=int, default=15,
-                       help='frames per second')
+    parser.add_argument('--indir', type=str, default='qrcodes', help='directory of your qrcode images', required=True)
+    parser.add_argument('--outfile', type=str, default='out', help='name of output video')
+    parser.add_argument('--fps', type=int, default=15, help='frames per second')
     args = parser.parse_args()
     video_trt = utils.evaluate_video_total_running_time(args.indir, args.fps)
     if video_trt > 120:
