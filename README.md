@@ -2,7 +2,7 @@
 # INTRODUCTION
 FileQrcoder is a basic tool used to convert a file in any format into a list of QRCode images. *Additionally, it also supports encrypting files and then converting them into QRCodes.*
 
-![image](https://github.com/lulinpeng/FileQrcoder/blob/main/intro_encode.png)
+
 
 # REQUIREMENTS
 
@@ -11,8 +11,30 @@ FileQrcoder is a basic tool used to convert a file in any format into a list of 
 |1| test_encode.py | MacOS |```pip install qrcode==8.0 pillow==11.1.0```|
 |2| test_decode.py | MacOS |```brew install zar, pip install pyzbar, export DYLD_LIBRARY_PATH=/opt/homebrew/lib/```|
 
-# QUICK START
+# QUICK SHOW
+This quick show demonstrates how the file ***'fileqrcoder.py'*** is first encoded into multiple QR codes stored in ***'qrcodes/'***, then decoded into individual JSON reports in ***'reports/'***, which are merged into ***'merged_report.json'***, and finally used to perfectly reconstruct the original file as ***'out.txt'*** which is identical to ***'fileqrcoder.py'***, completing the full encoding-to-reconstruction pipeline with data integrity verification at each stage.
 
+##
+```shell
+export DYLD_LIBRARY_PATH=/opt/homebrew/lib/
+cd FileQrcoder/
+
+# 1. encode: 'fileqrcoder.py' -> 'qrcodes/'
+python3 fileqrcoder.py encode --infile fileqrcoder.py
+
+# 2. decode: 'qrcodes/' -> 'reports/'
+python3 fileqrcoder.py decode --indir qrcodes/ --outdir reports
+
+# 3. merge: 'reports/' -> 'merged_report.json'
+python3 fileqrcoder.py merge --indir reports/ --outfile merged_report.json
+
+# 4. recover: 'merged_report.json' -> 'out.txt'
+python3 fileqrcoder.py recover --report merged_report.json --outfile out.txt
+
+# 5. check if 'out.txt' is identical to 'fileqrcoder'
+```
+
+# Usage
 ## Encode
 ```shell
 python3 fileqrcoder.py encode --infile fileqrcoder.py
@@ -28,7 +50,23 @@ python3 fileqrcoder.py decode --infile qrcode.png
 python3 fileqrcoder.py decode --indir qrcodes
 ```
 
+## Merge
+```shell
+python3 fileqrcoder.py merge --indir report_20250719155714 # => report_xxx.json
+```
 
+## Recover
+```shell
+python3 fileqrcoder.py recover --report merged_report.json --outfile out.txt
+```
+
+
+# Video Version
+<div align="center">
+  <img src="intro_encode.png" width=450>
+</div>
+
+# Old Intro
 ## First Attempt
 ```shell
 cd FileQrcoder/demo/

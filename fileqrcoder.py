@@ -240,7 +240,7 @@ class FileQrcoder:
         tasks = []
         reports = []
         i = 0
-        report_dir = f'report_{utils.timestamp_str()}'
+        report_dir = f'report_{utils.timestamp_str()}' if report_dir is None else report_dir
         os.makedirs(report_dir, exist_ok=True)
         
         for interval in intervals:
@@ -356,30 +356,36 @@ if __name__ == '__main__':
     parser_encode.add_argument('--qrcode_version', type=int, default=27, help='qrcode version (1-40)')
     parser_encode.add_argument('--qrcode_box_size', type=int, default=4, help='number of pixels of “box” of QR code')
     parser_encode.add_argument('--id', type=str, default='', help='batch id of this time')
-    
 
     parser_decode = subparsers.add_parser("decode", help="recover a file from the given list of images containing QR codes", description="recover a file from the given list of images containing QR codes")
     parser_decode.add_argument('--indir', type=str, default=None, help='directory of your images')
     parser_decode.add_argument('--infile', type=str, default=None, help='a qrcode image')
-    parser_decode.add_argument('--outfile', type=str, default='decode.out', help='outoput file')
-    parser_decode.add_argument('--sk', type=int, default=None, help='secret key (a integer)')    
-    
+    parser_decode.add_argument('--outdir', type=str, default=None, help='output directory of generated JSON reports')
+    parser_decode.add_argument('--outfile', type=str, default=None, help='output file of JSON report')
+
     parser_merge = subparsers.add_parser("merge", help="merge all JSON reports", description="merge all JSON reports")
     parser_merge.add_argument('--indir', type=str, help='directory of your JSON reports', required=True)
     parser_merge.add_argument('--outfile', type=str, default=None, help='path or name of the merged report')
+    
+    parser_recover = subparsers.add_parser("recover", help="recover a file from your report", description="recover a file from you report")
+    parser_recover.add_argument('--report', type=str, help='your JSON report file', required=True)
+    parser_recover.add_argument('--outfile', type=str, default='recover.out', help='outoput file')
+    parser_recover.add_argument('--sk', type=int, default=None, help='secret key (a integer)')
     
     args = parser.parse_args()
     
     if not hasattr(args, "command") or args.command is None:
         parser.print_help()
     if args.command == 'encode':
+        print(f'+++++ encode +++++')
         print(f'input file = {args.infile}, sk = {args.sk}\n')
         fq_encode = FileQrcoder(qrcode_version=args.qrcode_version, qrcode_box_size=args.qrcode_box_size, sk=args.sk)
         qrcode_img_paths = fq_encode.gen_qrcodes_from_file_in_parallel(args.infile, id=args.id) 
         print(qrcode_img_paths)
     elif args.command == 'decode':
+        print(f'+++++ decode +++++')
         if args.indir is not None: # many qrcode images
-            print(f'indir = {args.indir}, outfile = {args.outfile}, sk = {args.sk}\n')
+            print(f'indir = {args.indir}, outfile = {args.outdir}\n')
             qrcodes = os.listdir(args.indir)
             qrcodes.sort()
             qrcodes = [os.path.join(args.indir, qrcode) for qrcode in qrcodes]
@@ -389,8 +395,8 @@ if __name__ == '__main__':
                     utils.heic_to_png(qrcodes[i], png_qrcode)
                     qrcodes[i] = png_qrcode
             print(qrcodes)
-            fq_decode = FileQrcoder(sk=args.sk)
-            reports = fq_decode.recover_slices_from_qrcodes_in_parallel(qrcodes)
+            fq_decode = FileQrcoder()
+            reports = fq_decode.recover_slices_from_qrcodes_in_parallel(qrcodes, report_dir=args.outdir)
             print(f'\nreports = {reports}')
         elif args.infile is not None: # single one qrcode image
             fq = FileQrcoder(sk=args.sk)
@@ -400,22 +406,17 @@ if __name__ == '__main__':
         else:
             print('one of --indir and --infile must not be empty')
     elif args.command == 'merge':
-        print('merge')
+        print(f'+++++ merge +++++')
         print(f'indir = {args.indir}')
         fq = FileQrcoder()
-        reports = os.listdir(args.indir) # get all qrcode images
+        reports = os.listdir(args.indir)
         reports = [os.path.join(args.indir, report) for report in reports]
         merged_report = fq.merge_reports(reports, args.outfile)
         print(f'merged report: {merged_report}')
+    elif args.command == 'recover':
+        print(f'+++++ recover +++++')
+        print(f'report = {args.report}, outfile = {args.outfile}')
+        fq = FileQrcoder(sk=args.sk)
+        fq.recover_file_from_report(args.report, args.outfile)
+        print(f'report = {args.report}, outfile = {args.outfile}')
         
-            # print(f'merged_report = {merged_report}')
-            # with open(merged_report) as f:
-            #     report = json.load(f)
-            # fq_decode.recover_file_from_report(merged_report)
-        pass
-        
-        
-        
-        
-        
-    
