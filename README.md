@@ -1,20 +1,16 @@
-# FileQrcoder
-# INTRODUCTION
+# Introduction
 FileQrcoder is a basic tool used to convert a file in any format into a list of QRCode images. *Additionally, it also supports encrypting files and then converting them into QRCodes.*
 
-
-
-# REQUIREMENTS
+# Requirements
 
 | Num | target | System  |	Requirements |
 |:--------:| :---------: | :---------:|:--------|
 |1| test_encode.py | MacOS |```pip install qrcode==8.0 pillow==11.1.0```|
 |2| test_decode.py | MacOS |```brew install zar, pip install pyzbar, export DYLD_LIBRARY_PATH=/opt/homebrew/lib/```|
 
-# QUICK SHOW
+# Quick Show
 This quick show demonstrates how the file ***'fileqrcoder.py'*** is first encoded into multiple QR codes stored in ***'qrcodes/'***, then decoded into individual JSON reports in ***'reports/'***, which are merged into ***'merged_report.json'***, and finally used to perfectly reconstruct the original file as ***'out.txt'*** which is identical to ***'fileqrcoder.py'***, completing the full encoding-to-reconstruction pipeline with data integrity verification at each stage.
 
-##
 ```shell
 export DYLD_LIBRARY_PATH=/opt/homebrew/lib/
 cd FileQrcoder/
@@ -34,7 +30,34 @@ python3 fileqrcoder.py recover --report merged_report.json --outfile out.txt
 # 5. check if 'out.txt' is identical to 'fileqrcoder'
 ```
 
-# Usage
+# Quick Show (video version)
+
+```shell
+export DYLD_LIBRARY_PATH=/opt/homebrew/lib/
+cd FileQrcoder/
+
+# 1. encode: 'fileqrcoder.py' -> 'qrcodes/'
+python3 fileqrcoder.py encode --infile fileqrcoder.py
+
+# 2. image2video: 'qrcodes/' -> 'a.mp4'
+python3 fileqrcoder.py image2video --indir qrcodes --outfile a.mp4
+
+# 3. video2image: 'a.mp4' -> 'frames/'
+python3 fileqrcoder.py video2image --infile a.mp4 --outdir frames
+
+# 4. decode: 'frames/' -> 'reports/'
+python3 fileqrcoder.py decode --indir frames/ --outdir reports
+
+# 5. merge: 'reports/' -> 'merged_report.json'
+python3 fileqrcoder.py merge --indir reports/ --outfile merged_report.json
+
+# 6. recover: 'merged_report.json' -> 'out.txt'
+python3 fileqrcoder.py recover --report merged_report.json --outfile out.txt
+
+# 7. check if 'out.txt' is identical to 'fileqrcoder'
+```
+
+# More Usage
 ## Encode
 ```shell
 python3 fileqrcoder.py encode --infile fileqrcoder.py
@@ -60,6 +83,15 @@ python3 fileqrcoder.py merge --indir report_20250719155714 # => report_xxx.json
 python3 fileqrcoder.py recover --report merged_report.json --outfile out.txt
 ```
 
+## Images to Video
+```shell
+python3 fileqrcoder.py image2video --indir qrcodes --outfile a.mp4
+```
+
+## Video to Images
+```shell
+python3 fileqrcoder.py video2image --infile a.mp4 --outdir frames
+```
 
 # Video Version
 <div align="center">

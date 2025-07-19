@@ -42,6 +42,7 @@ def image_flip(in_img_path:str, out_img_path:str=None, direction:str='horizontal
 
 # extract all frames of a video file into a directory named 'outdir'
 def extract_frames(video_file:str, outdir:str):
+    outdir = 'video_frames/' if outdir is None else outdir
     os.makedirs(outdir, exist_ok=True)
     # read all frames
     cap = cv2.VideoCapture(video_file)  
@@ -69,7 +70,7 @@ def evaluate_video_total_running_time(img_dir:str, fps:int):
     return trt
 
 # convert images into a video
-def imgs_to_video(images:list, outfile:str='out', fps:int=15):
+def imgs_to_video(images:list, outfile:str=None, fps:int=15):
     try:
         subprocess.run(["ffmpeg", "-version"], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     except:
@@ -80,7 +81,7 @@ def imgs_to_video(images:list, outfile:str='out', fps:int=15):
         for image in images:
             f.write(f'file {image}\n')
     img_cnt = len(images)
-    outfile += f'.{img_cnt}.mp4'
+    outfile = f'out.{timestamp_str()}.mp4' if outfile is None else outfile
     # construct ffmpeg cmd
     cmd = ["ffmpeg", "-r", str(fps),
            "-f", "concat",
