@@ -9,6 +9,8 @@ import time
 import utils
 import multiprocessing
 import PIL
+import sys
+import argparse
 
 # log setting
 logging.basicConfig(format='%(asctime)s.%(msecs)03d [%(levelname)s] [%(filename)s:%(lineno)d] %(message)s',
@@ -340,12 +342,6 @@ class FileQrcoder:
         with open(merged_report, 'w') as f:
             json.dump(slices, f)
         return merged_report
-    
-
-import sys
-import argparse
-import os
-import json
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='FileQrcoder: convert a file into a list of QR code images')
@@ -381,14 +377,23 @@ if __name__ == '__main__':
     parser_video2image.add_argument('--infile', type=str, help='a video file', required=True)
     parser_video2image.add_argument('--outdir', type=str, default=None, help='directory used to store all frames of the video')
     
-    parser_video2image = subparsers.add_parser("concatimage", help="concat images vertically or horizontally", description="concat images vertically or horizontally")
-    parser_video2image.add_argument('--indir', type=str, help='directory of all input images', required=True)
-    parser_video2image.add_argument('--rows', type=int, help='row number', required=True)
-    parser_video2image.add_argument('--cols', type=int, help='column number', required=True)
-    parser_video2image.add_argument('--outdir', type=str, default=None, help='directory of all concatented images')
-    parser_video2image.add_argument('--interval', type=int, default=None, help='image interval')
+    parser_concatimage = subparsers.add_parser("concatimage", help="concat images vertically or horizontally", description="concat images vertically or horizontally")
+    parser_concatimage.add_argument('--indir', type=str, help='directory of all input images', required=True)
+    parser_concatimage.add_argument('--rows', type=int, help='row number', required=True)
+    parser_concatimage.add_argument('--cols', type=int, help='column number', required=True)
+    parser_concatimage.add_argument('--outdir', type=str, default=None, help='directory of all concatented images')
+    parser_concatimage.add_argument('--interval', type=int, default=None, help='image interval')
     
+    parser_splitimage= subparsers.add_parser("splitimage", help="split images", description="split images")
+    parser_splitimage.add_argument('--indir', type=str, help='directory of all input images', required=True)
+    parser_splitimage.add_argument('--rows', type=int, help='row number', required=True)
+    parser_splitimage.add_argument('--cols', type=int, help='column number', required=True)
+    parser_splitimage.add_argument('--outdir', type=str, default=None, help='directory of all splited images')
     
+    parser_flipimage= subparsers.add_parser("flipimage", help="flip images horizontally or vertically", description="flip images horizontally or vertically")
+    parser_flipimage.add_argument('--infile', type=str, help='directory of all input images', required=True)
+    parser_flipimage.add_argument('--direction', type=str, help='vertical or horizontal', required=True)
+    parser_flipimage.add_argument('--outfile', type=str, default=None, help='path of the flipped image')
     
     args = parser.parse_args()
     
@@ -452,8 +457,18 @@ if __name__ == '__main__':
         print(f'+++++ video2image +++++')
         utils.extract_frames(args.infile, args.outdir)
     elif args.command == 'concatimage':
+        print(f'+++++ concatimage +++++')
         qrcodes = os.listdir(args.indir) # get all qrcode images
         qrcodes.sort()
         qrcodes = [os.path.join(args.indir, qrcode) for qrcode in qrcodes]
         print(qrcodes)
         utils.concat_img(qrcodes, args.rows, args.cols, interval=0)
+    elif args.command == 'splitimage':
+        print(f'+++++ splitimage +++++')
+        qrcodes = os.listdir(args.indir) # get all qrcode images
+        qrcodes.sort()
+        qrcodes = [os.path.join(args.indir, qrcode) for qrcode in qrcodes]
+        utils.split_image(qrcodes, args.rows, args.cols, args.outdir)
+    elif args.command == 'flipimage':
+        print(f'+++++ flipimage +++++')
+        utils.flip_image(args.infile, args.outfile, args.direction)

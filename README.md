@@ -66,11 +66,11 @@ python3 fileqrcoder.py encode --infile fileqrcoder.py
 ```
 
 ## Decode
-## one qrcode
+### one qrcode
 ```shell
 python3 fileqrcoder.py decode --infile qrcode.png
 ```
-## many qrcodes
+### many qrcodes
 ```shell
 python3 fileqrcoder.py decode --indir qrcodes
 ```
@@ -95,17 +95,28 @@ python3 fileqrcoder.py image2video --indir qrcodes --outfile a.mp4
 python3 fileqrcoder.py video2image --infile a.mp4 --outdir frames
 ```
 
+## Concat Image
+```shell
+python3 fileqrcoder.py encode --infile fileqrcoder.py
+
+ python3 fileqrcoder.py concatimage --indir qrcodes --rows 2 --cols 2 --outdir concat/
+ ```
+
+## Split Image
+```shell
+python3 fileqrcoder.py splitimage --indir concat/ --rows 2 --cols 2 --outdir split/
+```
+
+## Flip Image
+```shell
+python3 fileqrcoder.py flipimage --infile qrcode.png --direction horizontal --outfile qrcode.flip.png
+```
+
 # Video Version
 <div align="center">
   <img src="intro_encode.png" width=450>
 </div>
 
-
-## Concat Images
-```shell
-
- python3 fileqrcoder.py concatimage --indir qrcodes --rows 2 --cols 2 --outdir concat/
- ```
 
 # Old Intro
 ## First Attempt

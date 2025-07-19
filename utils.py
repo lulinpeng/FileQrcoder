@@ -29,14 +29,14 @@ def is_macos():
     return sys.platform == "darwin"
  
 # flip an image horizontally or vertically
-def image_flip(in_img_path:str, out_img_path:str=None, direction:str='horizontal'):
+def flip_image(in_img_path:str, out_img_path:str=None, direction:str='horizontal'):
     assert(direction == 'horizontal' or direction == 'vertical')
     in_img = cv2.imread(in_img_path)
     flag = 0 if direction == 'horizontal' else 1
     out_img = cv2.flip(in_img, flag)
     format = in_img_path.split('.')[-1]
     out_img_path = f'{in_img_path}.{direction}.{format}' if out_img_path is None else out_img_path
-    print(f'image_flip: {out_img_path}')
+    print(f'flip_image: {out_img_path}')
     cv2.imwrite(out_img_path, out_img)
     return 
 
