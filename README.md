@@ -32,12 +32,6 @@ python3 fileqrcoder.py recover --report merged_report.json --outfile out.txt
 
 # Quick Show (video version)
 
-***'qrcodes/'*** -> ***'a.mp4'*** - > ***'frames/'***
-
-
-This quick show demonstrates how the file ***'fileqrcoder.py'*** is first encoded into multiple QR codes stored in ***'qrcodes/'***, then decoded into individual JSON reports in ***'reports/'***, which are merged into ***'merged_report.json'***, and finally used to perfectly reconstruct the original file as ***'out.txt'*** which is identical to ***'fileqrcoder.py'***, completing the full encoding-to-reconstruction pipeline with data integrity verification at each stage.
-
-
 This demonstration showcases a complete file-to-QR-video conversion system using ***'fileqrcoder.py'*** as an example. The encoding process first converts the file into multiple QR code images stored in ***'qrcodes/'*** directory, then compiles them into ***'a.mp4'*** video. For decoding, the system extracts video frames into ***'frames/'***, decodes them into JSON reports in ***'reports/'***, merges these into ***'merged_report.json'***, and finally reconstructs the original file as ***'out.txt'*** which is identical to ***'fileqrcoder.py'***, demonstrating a perfect bidirectional conversion cycle that maintains complete data integrity throughout all transformation stages.
 
 ```shell
