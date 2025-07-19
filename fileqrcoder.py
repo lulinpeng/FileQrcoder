@@ -372,6 +372,15 @@ if __name__ == '__main__':
     parser_recover.add_argument('--outfile', type=str, default='recover.out', help='outoput file')
     parser_recover.add_argument('--sk', type=int, default=None, help='secret key (a integer)')
     
+    parser_image2video = subparsers.add_parser("image2video", help="recover a file from your report", description="recover a file from you report")
+    parser_image2video.add_argument('--indir', type=str, help='directory of qrcode images', required=True)
+    parser_image2video.add_argument('--outfile', type=str, default='out', help='name of output video')
+    parser_image2video.add_argument('--fps', type=int, default=15, help='frames per second')
+    
+    parser_video2image = subparsers.add_parser("video2image", help="extrac all frames of a video", description="extrac all frames of a video")
+    parser_video2image.add_argument('--infile', type=str, help='a video file', required=True)
+    parser_video2image.add_argument('--outdir', type=str, default='video_result/', help='directory used to store all frames of the video')
+    
     args = parser.parse_args()
     
     if not hasattr(args, "command") or args.command is None:
@@ -419,4 +428,17 @@ if __name__ == '__main__':
         fq = FileQrcoder(sk=args.sk)
         fq.recover_file_from_report(args.report, args.outfile)
         print(f'report = {args.report}, outfile = {args.outfile}')
-        
+    elif args.command == 'image2video':
+        print(f'+++++ image2video +++++')
+        video_trt = utils.evaluate_video_total_running_time(args.indir, args.fps)
+        if video_trt > 120:
+            user_input = input('The video longer than 2 minutes, do you still want to proceed? ').strip()
+            if user_input == 'N' or user_input == "n":
+                sys.exit()
+        images = os.listdir(args.indir)
+        images = [os.path.join(args.indir, image) for image in images]
+        outfile = utils.imgs_to_video(images, outfile=args.outfile, fps=args.fps)
+        print(f'output video: {outfile}')
+    elif args.command == 'video2image':
+        print(f'+++++ video2image +++++')
+        utils.extract_frames(args.infile, args.outdir)
