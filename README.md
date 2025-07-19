@@ -112,6 +112,11 @@ python3 fileqrcoder.py splitimage --indir concat/ --rows 2 --cols 2 --outdir spl
 python3 fileqrcoder.py flipimage --infile qrcode.png --direction horizontal --outfile qrcode.flip.png
 ```
 
+## Image2GIF
+```shell
+python3 fileqrcoder.py image2gif --indir qrcodes/ --outfile a.gif
+```
+
 # Video Version
 <div align="center">
   <img src="intro_encode.png" width=450>
