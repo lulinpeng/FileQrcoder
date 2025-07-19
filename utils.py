@@ -40,6 +40,15 @@ def flip_image(in_img_path:str, out_img_path:str=None, direction:str='horizontal
     cv2.imwrite(out_img_path, out_img)
     return 
 
+# extract the audio from a video
+def extract_audio(video_file:str, audio_file:str=None):
+    audio_file = 'out.aac' if audio_file is None else audio_file
+    cmd = ["ffmpeg", "-i", video_file, "-c:a", "copy", audio_file]
+    # ffmpeg -i A.mp4 -c:a copy output.aac
+    print(f'cmd = {cmd}')
+    subprocess.run(cmd, check=True)
+    return audio_file
+
 # extract all frames of a video file into a directory named 'outdir'
 def extract_frames(video_file:str, outdir:str):
     outdir = 'video_frames/' if outdir is None else outdir

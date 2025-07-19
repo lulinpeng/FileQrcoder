@@ -377,6 +377,10 @@ if __name__ == '__main__':
     parser_video2image.add_argument('--infile', type=str, help='a video file', required=True)
     parser_video2image.add_argument('--outdir', type=str, default=None, help='directory used to store all frames of the video')
     
+    parser_video2audio = subparsers.add_parser("video2audio", help="extract the audio of a video", description="extract the audio of a video")
+    parser_video2audio.add_argument('--infile', type=str, help='a video file', required=True)
+    parser_video2audio.add_argument('--outfile', type=str, default=None, help='path of the extracted audio file')
+    
     parser_concatimage = subparsers.add_parser("concatimage", help="concat images vertically or horizontally", description="concat images vertically or horizontally")
     parser_concatimage.add_argument('--indir', type=str, help='directory of all input images', required=True)
     parser_concatimage.add_argument('--rows', type=int, help='row number', required=True)
@@ -460,6 +464,10 @@ if __name__ == '__main__':
     elif args.command == 'video2image':
         print(f'+++++ video2image +++++')
         utils.extract_frames(args.infile, args.outdir)
+    elif args.command == 'video2audio':
+        print(f'+++++ video2audio +++++')
+        print(args.infile, args.outfile)
+        utils.extract_audio(args.infile, args.outfile)
     elif args.command == 'concatimage':
         print(f'+++++ concatimage +++++')
         images = os.listdir(args.indir)
