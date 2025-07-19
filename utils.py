@@ -163,7 +163,8 @@ def gen_and_save_qrcode(data:str, outfile:str='qrcode.png', QR_CODE_CAPATITY_BYT
     return
 
 # convert a list of images into a GIF picture
-def images2gif(img_paths:list, out_gif:str = 'out.gif'):
+def images2gif(img_paths:list, out_gif:str=None):
+    out_gif = f'out.gif' if out_gif is None else out_gif
     images = []
     for i in range(len(img_paths)): 
         logging.debug(f'images2gif: img_path = {img_paths[i]}')

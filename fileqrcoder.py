@@ -384,16 +384,20 @@ if __name__ == '__main__':
     parser_concatimage.add_argument('--outdir', type=str, default=None, help='directory of all concatented images')
     parser_concatimage.add_argument('--interval', type=int, default=None, help='image interval')
     
-    parser_splitimage= subparsers.add_parser("splitimage", help="split images", description="split images")
+    parser_splitimage = subparsers.add_parser("splitimage", help="split images", description="split images")
     parser_splitimage.add_argument('--indir', type=str, help='directory of all input images', required=True)
     parser_splitimage.add_argument('--rows', type=int, help='row number', required=True)
     parser_splitimage.add_argument('--cols', type=int, help='column number', required=True)
     parser_splitimage.add_argument('--outdir', type=str, default=None, help='directory of all splited images')
     
-    parser_flipimage= subparsers.add_parser("flipimage", help="flip images horizontally or vertically", description="flip images horizontally or vertically")
+    parser_flipimage = subparsers.add_parser("flipimage", help="flip images horizontally or vertically", description="flip images horizontally or vertically")
     parser_flipimage.add_argument('--infile', type=str, help='directory of all input images', required=True)
     parser_flipimage.add_argument('--direction', type=str, help='vertical or horizontal', required=True)
     parser_flipimage.add_argument('--outfile', type=str, default=None, help='path of the flipped image')
+    
+    parser_image2gif = subparsers.add_parser("image2gif", help="convert a list of images into a GIF picture", description="convert a list of images into a GIF picture")
+    parser_image2gif.add_argument('--indir', type=str, help='directory of all input images', required=True)
+    parser_image2gif.add_argument('--outfile', type=str, default=None, help='path of the GIF')
     
     args = parser.parse_args()
     
@@ -458,17 +462,22 @@ if __name__ == '__main__':
         utils.extract_frames(args.infile, args.outdir)
     elif args.command == 'concatimage':
         print(f'+++++ concatimage +++++')
-        qrcodes = os.listdir(args.indir) # get all qrcode images
-        qrcodes.sort()
-        qrcodes = [os.path.join(args.indir, qrcode) for qrcode in qrcodes]
-        print(qrcodes)
-        utils.concat_img(qrcodes, args.rows, args.cols, interval=0)
+        images = os.listdir(args.indir)
+        images.sort()
+        images = [os.path.join(args.indir, image) for image in images]
+        utils.concat_img(images, args.rows, args.cols, interval=0)
     elif args.command == 'splitimage':
         print(f'+++++ splitimage +++++')
-        qrcodes = os.listdir(args.indir) # get all qrcode images
-        qrcodes.sort()
-        qrcodes = [os.path.join(args.indir, qrcode) for qrcode in qrcodes]
-        utils.split_image(qrcodes, args.rows, args.cols, args.outdir)
+        images = os.listdir(args.indir)
+        images.sort()
+        images = [os.path.join(args.indir, image) for image in images]
+        utils.split_image(images, args.rows, args.cols, args.outdir)
     elif args.command == 'flipimage':
         print(f'+++++ flipimage +++++')
         utils.flip_image(args.infile, args.outfile, args.direction)
+    elif args.command == 'image2gif':
+        print(f'+++++ image2gif +++++')
+        images = os.listdir(args.indir)
+        images.sort()
+        images = [os.path.join(args.indir, image) for image in images]
+        utils.images2gif(images, args.outfile)
