@@ -351,7 +351,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='FileQrcoder: convert a file into a list of QR code images')
     subparsers = parser.add_subparsers( dest="command", title="available commands", metavar="command")
     parser_encode = subparsers.add_parser("encode", help="encode file into QR Code images", description="encode file into QR Code images")
-    parser_encode.add_argument('--infile', type=str, default=sys.argv[0], help='file to be encoded', required=True)
+    parser_encode.add_argument('--infile', type=str, help='file to be encoded', required=True)
     parser_encode.add_argument('--sk', type=int, default=None, help='secret key (a integer)')
     parser_encode.add_argument('--qrcode_version', type=int, default=27, help='qrcode version (1-40)')
     parser_encode.add_argument('--qrcode_box_size', type=int, default=4, help='number of pixels of “box” of QR code')
@@ -380,6 +380,15 @@ if __name__ == '__main__':
     parser_video2image = subparsers.add_parser("video2image", help="extrac all frames of a video", description="extrac all frames of a video")
     parser_video2image.add_argument('--infile', type=str, help='a video file', required=True)
     parser_video2image.add_argument('--outdir', type=str, default=None, help='directory used to store all frames of the video')
+    
+    parser_video2image = subparsers.add_parser("concatimage", help="concat images vertically or horizontally", description="concat images vertically or horizontally")
+    parser_video2image.add_argument('--indir', type=str, help='directory of all input images', required=True)
+    parser_video2image.add_argument('--rows', type=int, help='row number', required=True)
+    parser_video2image.add_argument('--cols', type=int, help='column number', required=True)
+    parser_video2image.add_argument('--outdir', type=str, default=None, help='directory of all concatented images')
+    parser_video2image.add_argument('--interval', type=int, default=None, help='image interval')
+    
+    
     
     args = parser.parse_args()
     
@@ -442,3 +451,9 @@ if __name__ == '__main__':
     elif args.command == 'video2image':
         print(f'+++++ video2image +++++')
         utils.extract_frames(args.infile, args.outdir)
+    elif args.command == 'concatimage':
+        qrcodes = os.listdir(args.indir) # get all qrcode images
+        qrcodes.sort()
+        qrcodes = [os.path.join(args.indir, qrcode) for qrcode in qrcodes]
+        print(qrcodes)
+        utils.concat_img(qrcodes, args.rows, args.cols, interval=0)

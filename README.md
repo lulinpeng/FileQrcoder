@@ -100,6 +100,13 @@ python3 fileqrcoder.py video2image --infile a.mp4 --outdir frames
   <img src="intro_encode.png" width=450>
 </div>
 
+
+## Concat Images
+```shell
+
+ python3 fileqrcoder.py concatimage --indir qrcodes --rows 2 --cols 2 --outdir concat/
+ ```
+
 # Old Intro
 ## First Attempt
 ```shell
