@@ -383,6 +383,11 @@ if __name__ == '__main__':
     parser_video2audio.add_argument('--infile', type=str, help='a video file', required=True)
     parser_video2audio.add_argument('--outfile', type=str, default=None, help='path of the extracted audio file')
     
+    parser_addaudio = subparsers.add_parser("addaudio", help="add audio to a slient video", description="add audio to a slient video")
+    parser_addaudio.add_argument('--video', type=str, help='your video file', required=True)
+    parser_addaudio.add_argument('--audio', type=str, default=None, help='your audio file')
+    parser_addaudio.add_argument('--outfile', type=str, default=None, help='path of the extracted audio file')
+    
     parser_concatimage = subparsers.add_parser("concatimage", help="concat images vertically or horizontally", description="concat images vertically or horizontally")
     parser_concatimage.add_argument('--indir', type=str, help='directory of all input images', required=True)
     parser_concatimage.add_argument('--rows', type=int, help='row number', required=True)
@@ -470,6 +475,10 @@ if __name__ == '__main__':
         print(f'+++++ video2audio +++++')
         print(args.infile, args.outfile)
         utils.extract_audio(args.infile, args.outfile)
+    elif args.command == 'addaudio':
+        print(f'+++++ addaudio +++++')
+        print(args.video, args.audio, args.outfile)
+        utils.add_audio(args.video, args.audio, args.outfile)
     elif args.command == 'concatimage':
         print(f'+++++ concatimage +++++')
         images = os.listdir(args.indir)

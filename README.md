@@ -106,6 +106,11 @@ python3 fileqrcoder.py video2image --infile a.mp4 --outdir frames
 python3 fileqrcoder.py video2audio --infile A.mp4
 ```
 
+## Add Audio to A Slient Video
+```shell
+python3 fileqrcoder.py addaudio --video a.mp4 --audio out.aac --outfile out.mp4
+```
+
 ## Concat Image
 
 ```shell

@@ -40,11 +40,18 @@ def flip_image(in_img_path:str, out_img_path:str=None, direction:str='horizontal
     cv2.imwrite(out_img_path, out_img)
     return 
 
+# add audio to a slient video
+def add_audio(video_file:str, audio_file:str, outfile:str=None):
+    outfile = 'out.mp4' if outfile is None else outfile
+    cmd = ["ffmpeg", "-i", video_file, "-i", audio_file, "-c:v", "copy", "-c:a", "copy", outfile]
+    print(f'cmd = {cmd}')
+    subprocess.run(cmd, check=True)
+    return audio_file
+
 # extract the audio from a video
 def extract_audio(video_file:str, audio_file:str=None):
     audio_file = 'out.aac' if audio_file is None else audio_file
     cmd = ["ffmpeg", "-i", video_file, "-c:a", "copy", audio_file]
-    # ffmpeg -i A.mp4 -c:a copy output.aac
     print(f'cmd = {cmd}')
     subprocess.run(cmd, check=True)
     return audio_file
