@@ -41,6 +41,14 @@ def flip_image(in_img_path:str, out_img_path:str=None, direction:str='horizontal
     cv2.imwrite(out_img_path, out_img)
     return 
 
+def compress_video(infile:str, out_width:int, out_height:int, out_bitrate:int, out_fps:float, outfile:str=None):
+    suffix = infile.split('.')[-1]
+    outfile = f'out.{suffix}' if outfile is None else outfile
+    ffmpeg_cmd = f'ffmpeg -i {infile} -c:a copy -vf scale={out_width}:{out_height} -b:v {out_bitrate} -r {out_fps} {outfile}'
+    print(f'ffmpeg cmd: {ffmpeg_cmd}')
+    os.system(ffmpeg_cmd)
+    return
+
 def describe_video(video:str):
     desc_file = 'tmp.json'
     with open(desc_file,'w') as f:

@@ -116,6 +116,11 @@ python3 fileqrcoder.py addaudio --video a.mp4 --audio out.aac --outfile out.mp4
 python3 fileqrcoder.py descvideo --video a.mp4
 ```
 
+## Compress Video
+```shell
+python3 fileqrcoder.py compressvideo --infile a.mp4 --width 2000 --height 1000 --fps 5 --bitrate 30000
+```
+
 ## Concat Image
 
 ```shell

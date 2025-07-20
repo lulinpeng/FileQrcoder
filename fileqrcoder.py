@@ -391,6 +391,14 @@ if __name__ == '__main__':
     parser_descvideo = subparsers.add_parser("descvideo", help="describe the video", description="describe the video")
     parser_descvideo.add_argument('--video', type=str, help='your video file', required=True)
     
+    parser_compressvideo = subparsers.add_parser("compressvideo", help="compress the video", description="compress the video")
+    parser_compressvideo.add_argument('--infile', type=str, help='original video file', required=True)
+    parser_compressvideo.add_argument('--outfile', type=str, default=None, help='compressed video file')
+    parser_compressvideo.add_argument('--width', type=int, help='width', required=True)
+    parser_compressvideo.add_argument('--height', type=int, help='height', required=True)
+    parser_compressvideo.add_argument('--bitrate', type=int, help='bit rate', required=True)
+    parser_compressvideo.add_argument('--fps', type=float, help='frame per second (float type)', required=True)
+    
     parser_concatimage = subparsers.add_parser("concatimage", help="concat images vertically or horizontally", description="concat images vertically or horizontally")
     parser_concatimage.add_argument('--indir', type=str, help='directory of all input images', required=True)
     parser_concatimage.add_argument('--rows', type=int, help='row number', required=True)
@@ -485,6 +493,9 @@ if __name__ == '__main__':
     elif args.command == 'descvideo':
         print(f'+++++ descvideo +++++')
         utils.describe_video(args.video)
+    elif args.command == 'compressvideo':
+        print(f'+++++ compressvideo +++++')
+        utils.compress_video(args.infile, args.width, args.height, args.bitrate, args.fps, args.outfile)
     elif args.command == 'concatimage':
         print(f'+++++ concatimage +++++')
         images = os.listdir(args.indir)
