@@ -2,13 +2,6 @@
 
 FileQrcoder is a basic tool used to convert a file in any format into a list of QRCode images. *Additionally, it also supports encrypting files and then converting them into QRCodes.*
 
-# Requirements
-
-| Num |     target     | System | Requirements                                                                          |
-| :-: | :------------: | :----: | :------------------------------------------------------------------------------------ |
-|  1  | test_encode.py | MacOS | ``pip install qrcode==8.0 pillow==11.1.0``                                            |
-|  2  | test_decode.py | MacOS | ``brew install zar, pip install pyzbar, export DYLD_LIBRARY_PATH=/opt/homebrew/lib/`` |
-
 # Quick Show
 
 This quick show demonstrates how the file ***'fileqrcoder.py'*** is first encoded into multiple QR codes stored in ***'qrcodes/'***, then decoded into individual JSON reports in ***'reports/'***, which are merged into ***'merged_report.json'***, and finally used to perfectly reconstruct the original file as ***'out.txt'*** which is identical to ***'fileqrcoder.py'***, completing the full encoding-to-reconstruction pipeline with data integrity verification at each stage.
@@ -18,7 +11,7 @@ export DYLD_LIBRARY_PATH=/opt/homebrew/lib/
 cd FileQrcoder/
 
 # 1. encode: 'fileqrcoder.py' -> 'qrcodes/'
-python3 fileqrcoder.py encode --infile fileqrcoder.py
+python3 fileqrcoder.py encode --infile fileqrcoder.py --outdir qrcodes/
 
 # 2. decode: 'qrcodes/' -> 'reports/'
 python3 fileqrcoder.py decode --indir qrcodes/ --outdir reports
@@ -41,7 +34,7 @@ export DYLD_LIBRARY_PATH=/opt/homebrew/lib/
 cd FileQrcoder/
 
 # 1. encode: 'fileqrcoder.py' -> 'qrcodes/'
-python3 fileqrcoder.py encode --infile fileqrcoder.py
+python3 fileqrcoder.py encode --infile fileqrcoder.py --outdir qrcodes/
 
 # 2. image2video: 'qrcodes/' -> 'a.mp4'
 python3 fileqrcoder.py image2video --indir qrcodes --outfile a.mp4
@@ -147,6 +140,13 @@ python3 fileqrcoder.py image2gif --indir qrcodes/ --outfile a.gif
 
 # Old Intro
 
+# Requirements
+
+| Num |     target     | System | Requirements                                                                          |
+| :-: | :------------: | :----: | :------------------------------------------------------------------------------------ |
+|  1  | test_encode.py | MacOS | ``pip install qrcode==8.0 pillow==11.1.0``                                            |
+|  2  | test_decode.py | MacOS | ``brew install zar, pip install pyzbar, export DYLD_LIBRARY_PATH=/opt/homebrew/lib/`` |
+
 ## First Attempt
 
 ```shell
@@ -202,7 +202,7 @@ python3 test_decode.py --indir video_result
 
 # BENCHMARK
 
-Testing conducted on: **Apple MacBook Pro (13-inch, M1, 2020)**. Specs: Apple M1 chip (8-core CPU/GPU), 16GB RAM, macOS [Sequoia, 15.3.1] 
+Testing conducted on: **Apple MacBook Pro (13-inch, M1, 2020)**. Specs: Apple M1 chip (8-core CPU/GPU), 16GB RAM, macOS [Sequoia, 15.3.1]
 
 | Num | Size of input file | CPU cores | Num of QR code images | Total time |   Rate   |
 | :-: | :----------------: | :-------: | :-------------------: | :--------: | :------: |

@@ -153,14 +153,14 @@ class FileQrcoder:
             logging.info(f'generate {i - start_id}-th / {end_id - start_id} where range is [ {start_id, end_id}) and image id is {i}, {round((end-start) / 1024 / (4/3), 3)} KB')
             slice_str = self.data[start:end]
             logging.debug(f'slice_str = {slice_str}')
-            img_path = f"{self.qrcodes_dir}{id}qrcode_{str(i).zfill(self.index_len)}.png"
+            img_path = os.path.join(self.qrcodes_dir, f"{self.identity}qrcode_{str(i).zfill(self.index_len)}.png")
             logging.debug(f'img_path = {img_path}')
             img = self.gen_qrcode(slice_str)
             img.save(img_path)
         return
     
     # generate QR codes for the given file, and put the resulting QR code images in 'qrcodes_dir'
-    def gen_qrcodes_from_file_in_parallel(self, infile:str, qrcodes_dir:str = './qrcodes/', id:str='', processes:int = None):
+    def gen_qrcodes_from_file_in_parallel(self, infile:str, qrcodes_dir:str=None, identity:str=None, processes:int = None):
         '''
         Generate QR codes for the given file, and put the resulting QR code images in 'qrcodes_dir'
           'infile': the input file path
@@ -169,8 +169,9 @@ class FileQrcoder:
         '''
         processes = os.cpu_count() if processes == None else processes
         self.infile = infile
-        self.qrcodes_dir = qrcodes_dir
-        os.makedirs(qrcodes_dir, exist_ok=True)
+        self.qrcodes_dir = './qrcodes/' if qrcodes_dir is None else qrcodes_dir
+        os.makedirs(self.qrcodes_dir, exist_ok=True)
+        self.identity = '' if identity is None else identity
 
         base64_str = self.file_to_base64_str()
         self.data = self.embed_index(base64_str)
@@ -191,7 +192,7 @@ class FileQrcoder:
             task.join()
 
         # all paths of the resulting QR code images
-        img_paths = [f"{self.qrcodes_dir}{id}qrcode_{str(i).zfill(self.index_len)}.png" for i in range(self.total_num_of_qrcodes)]
+        img_paths = [os.path.join(self.qrcodes_dir, f"{self.identity}qrcode_{str(i).zfill(self.index_len)}.png") for i in range(self.total_num_of_qrcodes)]
 
         return img_paths
     
@@ -351,7 +352,8 @@ if __name__ == '__main__':
     parser_encode.add_argument('--sk', type=int, default=None, help='secret key (a integer)')
     parser_encode.add_argument('--qrcode_version', type=int, default=27, help='qrcode version (1-40)')
     parser_encode.add_argument('--qrcode_box_size', type=int, default=4, help='number of pixels of “box” of QR code')
-    parser_encode.add_argument('--id', type=str, default='', help='batch id of this time')
+    parser_encode.add_argument('--id', type=str, default=None, help='batch id of this time')
+    parser_encode.add_argument('--outdir', type=str, default=None, help='directory used to store all qrcode images')
 
     parser_decode = subparsers.add_parser("decode", help="recover a file from the given list of images containing QR codes", description="recover a file from the given list of images containing QR codes")
     parser_decode.add_argument('--indir', type=str, default=None, help='directory of your images')
@@ -411,7 +413,7 @@ if __name__ == '__main__':
         print(f'+++++ encode +++++')
         print(f'input file = {args.infile}, sk = {args.sk}\n')
         fq_encode = FileQrcoder(qrcode_version=args.qrcode_version, qrcode_box_size=args.qrcode_box_size, sk=args.sk)
-        qrcode_img_paths = fq_encode.gen_qrcodes_from_file_in_parallel(args.infile, id=args.id) 
+        qrcode_img_paths = fq_encode.gen_qrcodes_from_file_in_parallel(args.infile, qrcodes_dir=args.outdir, identity=args.id) 
         print(qrcode_img_paths)
     elif args.command == 'decode':
         print(f'+++++ decode +++++')
