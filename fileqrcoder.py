@@ -373,7 +373,7 @@ if __name__ == '__main__':
     parser_image2video = subparsers.add_parser("image2video", help="recover a file from your report", description="recover a file from you report")
     parser_image2video.add_argument('--indir', type=str, help='directory of qrcode images', required=True)
     parser_image2video.add_argument('--outfile', type=str, default=None, help='name of output video')
-    parser_image2video.add_argument('--fps', type=int, default=15, help='frames per second')
+    parser_image2video.add_argument('--fps', type=float, default=15.0, help='frames per second')
     
     parser_video2image = subparsers.add_parser("video2image", help="extrac all frames of a video", description="extrac all frames of a video")
     parser_video2image.add_argument('--infile', type=str, help='a video file', required=True)
@@ -387,6 +387,9 @@ if __name__ == '__main__':
     parser_addaudio.add_argument('--video', type=str, help='your video file', required=True)
     parser_addaudio.add_argument('--audio', type=str, default=None, help='your audio file')
     parser_addaudio.add_argument('--outfile', type=str, default=None, help='path of the extracted audio file')
+    
+    parser_descvideo = subparsers.add_parser("descvideo", help="describe the video", description="describe the video")
+    parser_descvideo.add_argument('--video', type=str, help='your video file', required=True)
     
     parser_concatimage = subparsers.add_parser("concatimage", help="concat images vertically or horizontally", description="concat images vertically or horizontally")
     parser_concatimage.add_argument('--indir', type=str, help='directory of all input images', required=True)
@@ -479,6 +482,9 @@ if __name__ == '__main__':
         print(f'+++++ addaudio +++++')
         print(args.video, args.audio, args.outfile)
         utils.add_audio(args.video, args.audio, args.outfile)
+    elif args.command == 'descvideo':
+        print(f'+++++ descvideo +++++')
+        utils.describe_video(args.video)
     elif args.command == 'concatimage':
         print(f'+++++ concatimage +++++')
         images = os.listdir(args.indir)

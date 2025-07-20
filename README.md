@@ -111,6 +111,11 @@ python3 fileqrcoder.py video2audio --infile A.mp4
 python3 fileqrcoder.py addaudio --video a.mp4 --audio out.aac --outfile out.mp4
 ```
 
+## Describe Video
+```shell
+python3 fileqrcoder.py descvideo --video a.mp4
+```
+
 ## Concat Image
 
 ```shell

@@ -8,6 +8,7 @@ import subprocess
 import cv2
 import sys
 import datetime
+import json
 
 # log setting
 logging.basicConfig(format='%(asctime)s.%(msecs)03d [%(levelname)s] [%(filename)s:%(lineno)d] %(message)s',
@@ -39,6 +40,29 @@ def flip_image(in_img_path:str, out_img_path:str=None, direction:str='horizontal
     print(f'flip_image: {out_img_path}')
     cv2.imwrite(out_img_path, out_img)
     return 
+
+def describe_video(video:str):
+    desc_file = 'tmp.json'
+    with open(desc_file,'w') as f:
+        f.write('test')
+    ffprobe_cmd = f'ffprobe -v quiet -print_format json -show_format -show_streams {video} > {desc_file}' 
+    print(ffprobe_cmd)
+    os.system(ffprobe_cmd)
+    
+    with open(desc_file, encoding='utf-8') as f:    
+        video_info = json.load(f)
+    streams = video_info['streams']
+    i = 0
+    for stream in streams:
+        fps = stream.get('r_frame_rate')
+        width = stream.get('width')
+        height = stream.get('height')
+        frames = stream.get('nb_frames')
+        bit_rate = stream.get('bit_rate')
+        codec_name = stream.get('codec_name')
+        print(f'\n{i}-th stream: codec_name = {codec_name}, fps = {fps}, width = {width}, height = {height}, bitrate = {bit_rate}, frames = {frames}')
+        i += 1
+    return
 
 # add audio to a slient video
 def add_audio(video_file:str, audio_file:str, outfile:str=None):
@@ -86,7 +110,7 @@ def evaluate_video_total_running_time(img_dir:str, fps:int):
     return trt
 
 # convert images into a video
-def imgs_to_video(images:list, outfile:str=None, fps:int=15):
+def imgs_to_video(images:list, outfile:str=None, fps:float=15.0):
     try:
         subprocess.run(["ffmpeg", "-version"], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     except:
@@ -99,13 +123,7 @@ def imgs_to_video(images:list, outfile:str=None, fps:int=15):
     img_cnt = len(images)
     outfile = f'out.{timestamp_str()}.mp4' if outfile is None else outfile
     # construct ffmpeg cmd
-    cmd = ["ffmpeg", "-r", str(fps),
-           "-f", "concat",
-           "-safe", "0",
-            "-i", images_txt,
-            "-c:v", "libx264",
-            "-pix_fmt", "yuv420p",
-            "-y",  # cover existing file
+    cmd = ["ffmpeg", "-r", str(fps), "-f", "concat", "-safe", "0", "-i", images_txt, "-c:v", "libx264", "-pix_fmt", "yuv420p", "-y",  # cover existing file
             outfile]
     print(f'cmd = {cmd}')
     subprocess.run(cmd, check=True)
