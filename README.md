@@ -147,6 +147,15 @@ python3 fileqrcoder.py flipimage --infile qrcode.png --direction horizontal --ou
 python3 fileqrcoder.py image2gif --indir qrcodes/ --outfile a.gif
 ```
 
+## Compress && Decompress
+
+```shell
+# compress
+python3 fileqrcoder.py compress --infile fileqrcoder.py --outfile compressed_file.bin --level 10
+# decompress
+python3 fileqrcoder.py decompress --infile compressed_file.bin --outfile decompressed_file.bin
+```
+
 # Video Version
 
 <div align="center">
