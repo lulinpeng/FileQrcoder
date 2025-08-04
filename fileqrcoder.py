@@ -420,7 +420,16 @@ if __name__ == '__main__':
     parser_image2gif = subparsers.add_parser("image2gif", help="convert a list of images into a GIF picture", description="convert a list of images into a GIF picture")
     parser_image2gif.add_argument('--indir', type=str, help='directory of all input images', required=True)
     parser_image2gif.add_argument('--outfile', type=str, default=None, help='path of the GIF')
+    parser_image2gif = subparsers.add_parser("compress", help="compress a file", description="compress a file")
+    parser_image2gif.add_argument('--infile', type=str, help='input file', required=True)
+    parser_image2gif.add_argument('--outfile', type=str, default=None, help='output file')
+    parser_image2gif.add_argument('--level', type=int, default=None, help='ZSTD compress level')
     
+    parser_image2gif = subparsers.add_parser("decompress", help="decompress a file", description="decompress a file")
+    parser_image2gif.add_argument('--infile', type=str, help='input file', required=True)
+    parser_image2gif.add_argument('--outfile', type=str, default=None, help='output file')
+    
+  
     args = parser.parse_args()
     
     if not hasattr(args, "command") or args.command is None:
@@ -517,3 +526,9 @@ if __name__ == '__main__':
         images.sort()
         images = [os.path.join(args.indir, image) for image in images]
         utils.images2gif(images, args.outfile)
+    elif args.command == 'compress':
+        print(f'+++++ compress +++++')
+        utils.compress_file(args.infile, args.outfile, level=args.level)    
+    elif args.command == 'decompress':
+        print(f'+++++ decompress +++++')
+        utils.decompress_file(args.infile, args.outfile)
