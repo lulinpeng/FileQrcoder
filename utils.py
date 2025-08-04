@@ -14,6 +14,40 @@ import json
 logging.basicConfig(format='%(asctime)s.%(msecs)03d [%(levelname)s] [%(filename)s:%(lineno)d] %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S', level=logging.DEBUG)
 
+# compress a file with ZSTD library
+def compress_file(infile:str, outfile:str=None, level:int=None):
+    outfile = 'compressed_file.bin' if outfile is None else outfile
+    with open(infile, 'rb') as f:
+        data = f.read()
+    cdata = compress(data=data, level=level)
+    with open(outfile, 'wb') as f:
+        f.write(cdata)
+    return
+
+# compress with ZSTD library
+def compress(data:bytes, level:int=None):
+    level = 10 if level is None else level # compress level which is from 1(fast) to 22(slowest)
+    assert(level >= 1 and level <= 22)
+    import zstd
+    cdata = zstd.compress(data, level)
+    return cdata
+
+# decompress a file with ZSTD library
+def decompress_file(infile:str, outfile:str=None, level:int=None):
+    outfile = 'decompressed_file.bin' if outfile is None else outfile
+    with open(infile, 'rb') as f:
+        cdata = f.read()
+    data = decompress(cdata=cdata)
+    with open(outfile, 'wb') as f:
+        f.write(data)
+    return
+
+# decompress with ZSTD library
+def decompress(cdata:bytes):
+    import zstd
+    data = zstd.decompress(cdata)
+    return data
+
 # return a string of time stamp
 def timestamp_str():
     return datetime.datetime.now().strftime('%Y%m%d%H%M%S')
