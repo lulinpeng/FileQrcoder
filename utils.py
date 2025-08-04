@@ -30,6 +30,7 @@ def compress(data:bytes, level:int=None):
     assert(level >= 1 and level <= 22)
     import zstd
     cdata = zstd.compress(data, level)
+    print(f'compress: {len(data)} bytes -> {len(cdata)} bytes')
     return cdata
 
 # decompress a file with ZSTD library
@@ -46,6 +47,7 @@ def decompress_file(infile:str, outfile:str=None, level:int=None):
 def decompress(cdata:bytes):
     import zstd
     data = zstd.decompress(cdata)
+    print(f'decompress: {len(cdata)} bytes -> {len(data)} bytes')
     return data
 
 # return a string of time stamp
