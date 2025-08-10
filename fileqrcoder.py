@@ -258,8 +258,12 @@ class FileQrcoder:
             
         for task in tasks:
             task.join()
+        final_reports = []
+        for report in reports:
+            if os.path.isfile(report):
+                final_reports.append(report)
         logging.info(f'intervals = {intervals}')
-        return reports
+        return final_reports
     
     # recover a file from the given list of QR Code images
     # def recover_slices_from_qrcodes(self, qrcode_imgs:list, outfile:str = './recovered_file'):
@@ -268,6 +272,7 @@ class FileQrcoder:
         from pyzbar import pyzbar
         from PIL import Image
         all_slices = {}
+        max_idx = None
         for i in range(len(qrcode_imgs)):
             logging.info(f'{process_id}-th process: recover {i} / {len(qrcode_imgs)}, {qrcode_imgs[i]}')
             image = Image.open(qrcode_imgs[i])
@@ -298,6 +303,9 @@ class FileQrcoder:
                     raise BaseException(f'The content of {qrcode_imgs[i]} is invalid')
                 all_slices[slice_id] = content
         # save resolved slices
+        if max_idx is None:
+            logging.info('not found any qrcode')
+            return None
         all_slices['max_slice_id'] = max_idx
         missed_slice_ids = self.find_missed_slices(all_slices)
         all_slices['missed_slice_ids'] = missed_slice_ids
@@ -360,6 +368,10 @@ if __name__ == '__main__':
     parser_decode.add_argument('--infile', type=str, default=None, help='a qrcode image')
     parser_decode.add_argument('--outdir', type=str, default=None, help='output directory of generated JSON reports')
     parser_decode.add_argument('--outfile', type=str, default=None, help='output file of JSON report')
+    
+    parser_decode = subparsers.add_parser("decode_list", help="recover a file from the given list of images containing QR codes", description="recover a file from the given list of images containing QR codes")
+    parser_decode.add_argument('--listfile', type=str, help='images id list file', required=True)
+    parser_decode.add_argument('--cmdfile', type=str, help='command file', required=True)
 
     parser_merge = subparsers.add_parser("merge", help="merge all JSON reports", description="merge all JSON reports")
     parser_merge.add_argument('--indir', type=str, help='directory of your JSON reports', required=True)
@@ -463,6 +475,33 @@ if __name__ == '__main__':
                 print(f'{c}\n')
         else:
             print('one of --indir and --infile must not be empty')
+    elif args.command == 'decode_list':
+        print(f'+++++ decode_list +++++')
+        print(f'listfile = {args.listfile}, cmdfile = {args.cmdfile}\n')
+        old_batch_id = ''
+        while True:
+            print('decode by image list ... ')
+            with open(args.cmdfile, 'w') as f:
+                f.write('batch')
+            time.sleep(1)
+            if os.path.isfile(args.listfile):
+                with open(args.listfile) as f:
+                    lines = [line.strip() for line in f.readlines()]
+                batch_id = lines[0]
+                if batch_id == old_batch_id:
+                    print(f'batch_id {batch_id} == old_batch_id {old_batch_id}')
+                    continue
+                qrcodes = lines[1:]
+                print(qrcodes)
+                fq_decode = FileQrcoder()
+                reports = fq_decode.recover_slices_from_qrcodes_in_parallel(qrcodes, report_dir=f'batch/batch_{batch_id}')
+                print(f'\nreports = {reports}')
+                if len(reports) == 0:
+                    print(f'no qrcode is found, sleep for a while')
+                    time.sleep(5)
+                else:
+                    print(f'generate {len(reports)} reports')
+                    time.sleep(2)
     elif args.command == 'merge':
         print(f'+++++ merge +++++')
         print(f'indir = {args.indir}')
