@@ -262,6 +262,9 @@ class FileQrcoder:
         for report in reports:
             if os.path.isfile(report):
                 final_reports.append(report)
+        if len(final_reports) == 0:
+            logging.info(f'remove empty report dir {report_dir}')
+            os.rmdir(report_dir)
         logging.info(f'intervals = {intervals}')
         return final_reports
     
