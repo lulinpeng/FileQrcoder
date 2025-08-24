@@ -56,6 +56,10 @@ python3 fileqrcoder.py recover --report merged_report.json --outfile out.txt
 
 # More Usage
 
+## Decode From Camera
+```shell
+python3 fileqrcoder.py decodecamera
+```
 ## Encode
 
 ```shell
