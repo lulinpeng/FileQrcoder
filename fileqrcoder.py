@@ -14,7 +14,8 @@ import argparse
 
 # log setting
 logging.basicConfig(format='%(asctime)s.%(msecs)03d [%(levelname)s] [%(filename)s:%(lineno)d] %(message)s',
-                    datefmt='%Y-%m-%d %H:%M:%S', level=logging.INFO)
+                    datefmt='%Y-%m-%d %H:%M:%S')
+logging.getLogger().setLevel(logging.DEBUG)
 
 QRCODE_VERSIONS = {
     1: {'L': 17, 'M': 14, 'Q': 11, 'H': 8},
@@ -74,8 +75,14 @@ class FileQrcoder:
     index_len = 5 # index length of slice of base64 string is 8 bytes
     max_index_len = 5 # index length of max slice number
     
-    def __init__(self, qrcode_version:int=40, qrcode_error_correct:str='L', qrcode_box_size:int=4, sk:int=None):
-        logging.info(f'Initialize a FileQrcoder instance. qrcode_version = {qrcode_version}, qrcode_error_correct = {qrcode_error_correct}, sk={sk}')
+    def __init__(self, qrcode_version:int=40, qrcode_error_correct:str='L', qrcode_box_size:int=4, sk:int=None, logger_file:str=None):
+        self.logger_file = 'fileqrcoder.log' if logger_file is None else logger_file
+        f_handler = logging.FileHandler(self.logger_file)
+        f_handler.setLevel(logging.DEBUG)
+        f_handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(filename)s[:%(lineno)d] - %(message)s"))
+        self.logger = logging.getLogger()
+        self.logger.addHandler(f_handler)
+        self.logger.info(f'Initialize a FileQrcoder instance. qrcode_version = {qrcode_version}, qrcode_error_correct = {qrcode_error_correct}, sk={sk}')
         self.qrcode_version = qrcode_version
         self.qrcode_error_correct = ERROR_CORRECT_MAP[qrcode_error_correct]
         self.qrcode_capacity = QRCODE_VERSIONS[qrcode_version][qrcode_error_correct]
@@ -103,12 +110,12 @@ class FileQrcoder:
         with open(self.infile, 'rb') as f: # read file 
             binary_data = f.read()
         base64_str = base64.b64encode(binary_data).decode('utf-8') # base64 encode
-        logging.debug(f'base64 string = {base64_str}')
+        self.logger.debug(f'base64 string = {base64_str}')
         if self.sk != None: # encrypt the result base64 string with secret key 'sk'
-            logging.debug('encrypting the result base64 string ...')
+            self.logger.debug('encrypting the result base64 string ...')
             replace_table = self.gen_replace_table()
             encrypted_base64_str = self.encrypt_base64_str(base64_str, replace_table)
-            logging.debug(f'encrypted base64 string = {encrypted_base64_str}')
+            self.logger.debug(f'encrypted base64 string = {encrypted_base64_str}')
         
         return base64_str
     
@@ -135,7 +142,7 @@ class FileQrcoder:
     def embed_index(self, base64_str:str):
         slice_len = self.qrcode_capacity - self.index_len - self.max_index_len
         slice_num = math.ceil(len(base64_str) / slice_len)
-        logging.debug(f'slice_num = {slice_num}')
+        self.logger.debug(f'slice_num = {slice_num}')
         max_slice_id = int('9'*self.max_index_len)
         if slice_num >= max_slice_id:
             raise BaseException(f'slice num = {slice_num} should be less than max_slice_id = {max_slice_id}')
@@ -150,11 +157,11 @@ class FileQrcoder:
         for i in range(start_id, end_id):
             start = i * self.qrcode_capacity
             end = min((i + 1) * self.qrcode_capacity, len(self.data))
-            logging.info(f'generate {i - start_id}-th / {end_id - start_id} where range is [ {start_id, end_id}) and image id is {i}, {round((end-start) / 1024 / (4/3), 3)} KB')
+            self.logger.info(f'generate {i - start_id}-th / {end_id - start_id} where range is [ {start_id, end_id}) and image id is {i}, {round((end-start) / 1024 / (4/3), 3)} KB')
             slice_str = self.data[start:end]
-            logging.debug(f'slice_str = {slice_str}')
+            self.logger.debug(f'slice_str = {slice_str}')
             img_path = os.path.join(self.qrcodes_dir, f"{self.identity}qrcode_{str(i).zfill(self.index_len)}.png")
-            logging.debug(f'img_path = {img_path}')
+            self.logger.debug(f'img_path = {img_path}')
             img = self.gen_qrcode(slice_str)
             img.save(img_path)
         return
@@ -175,15 +182,15 @@ class FileQrcoder:
 
         base64_str = self.file_to_base64_str()
         self.data = self.embed_index(base64_str)
-        logging.debug(f'data = {self.data}')
+        self.logger.debug(f'data = {self.data}')
         self.total_num_of_qrcodes = math.ceil(len(self.data) / self.qrcode_capacity)
-        logging.info(f'total number of qrcodes = {self.total_num_of_qrcodes}')
+        self.logger.info(f'total number of qrcodes = {self.total_num_of_qrcodes}')
         intervals = utils.split_range_equally(0, self.total_num_of_qrcodes, processes)
-        logging.info(f'intervals = {intervals}')
+        self.logger.info(f'intervals = {intervals}')
 
         tasks = []
         for interval in intervals:
-            logging.info(f'{interval}')
+            self.logger.info(f'{interval}')
             task = multiprocessing.Process(target=self.gen_qrcodes_from_file, args=(interval[0], interval[1], id, ))
             tasks.append(task)
             task.start()
@@ -199,7 +206,7 @@ class FileQrcoder:
     # return a list of ids of all missed slices
     def find_missed_slices(self, all_slices:dict):
         max_slice_id = all_slices['max_slice_id']
-        logging.debug(f'max_slice_id = {max_slice_id}')
+        self.logger.debug(f'max_slice_id = {max_slice_id}')
         missed_slice_ids = []
         for i in range(max_slice_id):
             if str(i) not in all_slices:
@@ -212,7 +219,7 @@ class FileQrcoder:
         content = ''
         header_len = self.index_len+self.max_index_len
         for i in range(max_slice_id):
-            logging.debug(f'concating {i} / {max_slice_id} slice')
+            self.logger.debug(f'concating {i} / {max_slice_id} slice')
             content += all_slices[str(i)][header_len:]
         return content
     
@@ -227,35 +234,40 @@ class FileQrcoder:
         image = PIL.Image.open(qrcode_img)
         from pyzbar import pyzbar
         decoded_objects = pyzbar.decode(image)
-        if len(decoded_objects) == 0:
-            logging.info(f'no QR code is found')
-            return
-        contents = []
-        for obj in decoded_objects:
-            content = obj.data.decode("utf-8")
-            contents.append(content)
+        contents = [obj.data for obj in decoded_objects]
         return contents
 
+    def parse_content(self, content_bytes:bytes):
+        content = content_bytes.decode("utf-8")
+        if len(content) <= self.index_len + self.max_index_len:
+            self.logger.info(f'length of content ({len(content)}) is less than header length ({self.index_len + self.max_index_len})')
+            return None, None, None
+        try:
+            slice_id = int(content[:self.index_len])
+            max_slice_id = int(content[self.index_len:(self.index_len + self.max_index_len)])
+        except Exception as e:
+            self.logger.error(f'parse error:{str(e)}')
+            return None, None, None
+        return slice_id, max_slice_id, content
+    
     def recover_slices_from_qrcodes_in_parallel(self, qrcodes:list, processes:int = None, report_dir:str=None):
         processes = os.cpu_count() if processes == None else processes
         intervals = utils.split_range_equally(0, len(qrcodes), processes)
-        logging.info(f'intervals = {intervals}')
-        tasks = []
-        reports = []
-        i = 0
+        self.logger.info(f'intervals = {intervals}')
+        tasks, reports = [], []
         report_dir = f'report_{utils.timestamp_str()}' if report_dir is None else report_dir
         os.makedirs(report_dir, exist_ok=True)
-        
+        pid = 0
         for interval in intervals:
             qrcodes_sub = qrcodes[interval[0]:interval[1]]
             report = os.path.join(report_dir, f'report_{str(interval[0]).zfill(6)}_{str(interval[1]).zfill(6)}.json')
             reports.append(report)
-            logging.info(f'{interval}: report_file = {report}')
-            task = multiprocessing.Process(target=self.recover_slices_from_qrcodes, args=(i, qrcodes_sub, report,))
+            self.logger.info(f'{interval}: prepare report_file = {report}')
+            task = multiprocessing.Process(target=self.recover_slices_from_qrcodes, args=(pid, qrcodes_sub, report,))
             tasks.append(task)
             task.start()
-            i += 1
-            
+            pid += 1
+        
         for task in tasks:
             task.join()
         final_reports = []
@@ -263,9 +275,9 @@ class FileQrcoder:
             if os.path.isfile(report):
                 final_reports.append(report)
         if len(final_reports) == 0:
-            logging.info(f'remove empty report dir {report_dir}')
+            self.logger.info(f'remove empty report dir {report_dir}')
             os.rmdir(report_dir)
-        logging.info(f'intervals = {intervals}')
+        self.logger.info(f'intervals = {intervals}')
         return final_reports
     
     # recover a file from the given list of QR Code images
@@ -275,47 +287,93 @@ class FileQrcoder:
         from pyzbar import pyzbar
         from PIL import Image
         all_slices = {}
-        max_idx = None
+        max_slice_id = None
         for i in range(len(qrcode_imgs)):
-            logging.info(f'{process_id}-th process: recover {i} / {len(qrcode_imgs)}, {qrcode_imgs[i]}')
+            self.logger.info(f'{process_id}-th process: recover {i} / {len(qrcode_imgs)}, {qrcode_imgs[i]}')
             image = Image.open(qrcode_imgs[i])
-            
             decoded_objects = pyzbar.decode(image)
             if len(decoded_objects) == 0:
-                logging.info(f'no qr code inside {i}-th image')
+                self.logger.info(f'no qr code inside {i}-th image')
                 continue
             for obj in decoded_objects:
-                content = obj.data.decode("utf-8")
-                idx = content[:self.index_len]
-                try:
-                    max_idx = int(content[self.index_len:(self.index_len + self.max_index_len)])
-                    all_slices['max_slice_id'] = max_idx
-                except Exception as e:
-                    logging.error(f"exception detail = {e}, content = {content}")
+                slice_id, max_slice_id, content = self.parse_content(obj.data)
+                if slice_id is None:
                     time_str = time.strftime('%m%d%H%M%S')
                     tmp_report = f'{report}.{time_str}.tmp.json'
                     with open(report + '.tmp.json', 'w') as f:
                         json.dump(all_slices, f)
-                    logging.error(f'temp report is saved in file {tmp_report}')
-                    logging.error(f'skip {i}-th images {qrcode_imgs[i]}')
+                    self.logger.error(f'temp report is saved in file {tmp_report}, skip {i}-th images {qrcode_imgs[i]}')
                     continue
-                logging.info(f'{process_id}-th process: recover {i} / {len(qrcode_imgs)}, {round((len(content)) / 1024 / (4/3), 3)} KB, idx = {idx}, img path = {qrcode_imgs[i]}')
-                try:
-                    slice_id = int(content[:self.index_len])
-                except:
-                    raise BaseException(f'The content of {qrcode_imgs[i]} is invalid')
+                self.logger.info(f'{process_id}-th process: recover {i} / {len(qrcode_imgs)}, {round((len(content)) / 1024 / (4/3), 3)} KB, slice_id = {slice_id}, img path = {qrcode_imgs[i]}')
                 all_slices[slice_id] = content
-        # save resolved slices
-        if max_idx is None:
-            logging.info('not found any qrcode')
+       
+        if max_slice_id is None: # save resolved slices
+            self.logger.info('not found any qrcode')
             return None
-        all_slices['max_slice_id'] = max_idx
+        all_slices['max_slice_id'] = max_slice_id
         missed_slice_ids = self.find_missed_slices(all_slices)
         all_slices['missed_slice_ids'] = missed_slice_ids
         with open(report, 'w') as f:
             json.dump(all_slices, f)
         return all_slices
     
+    def save_slices(self, slices:dict, path:str=None):
+        self.logger.info('save slices')
+        path = 'slices.json' if path is None else path
+        if len(slices) % 10 == 0 or slices['max_slice_id'] == len(slices) - 1:
+            with open(path, 'w') as f:
+                json.dump(slices, f)
+        return
+    
+    def load_slices(self, path:str=None):
+        self.logger.info('loading slices')
+        path = 'slices.json' if path is None else path
+        with open(path) as f:
+            slices = json.load(f)
+        return slices
+    
+    def recover_from_camera(self, fps:float=None, exist_slices_path:str=None):
+        import cv2
+        fps = 20 if fps is None else fps
+        self.width = 720
+        self.height = 720
+        stream_url = "http://192.168.1.5:8080/video"
+        self.cap = cv2.VideoCapture(stream_url)
+        self.logger.info(f'CAP_PROP_FRAME_WIDTH = {self.cap.get(cv2.CAP_PROP_FRAME_WIDTH)}')
+        self.logger.info(f'CAP_PROP_FRAME_HEIGHT = {self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)}')
+        self.cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
+        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.width)
+        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.height)
+        self.logger.info(f'CAP_PROP_FRAME_WIDTH = {self.cap.get(cv2.CAP_PROP_FRAME_WIDTH)}')
+        self.logger.info(f'CAP_PROP_FRAME_HEIGHT = {self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)}')
+        outdir = 'camera'
+        os.makedirs(outdir, exist_ok=True)
+        MAX_IMG_ID = 100000
+        img_id = 0
+        all_slices = {} if exist_slices_path is None else self.load_slices('slices.json')
+        while True:
+            success, img = self.cap.read() # read a frame
+            if success:
+                cv2.imshow("FileQrcoder", img)
+                interval = round(1000 / fps)
+                img_id = (img_id + 1) % MAX_IMG_ID
+                img_path = os.path.join(outdir, f'{str(img_id).zfill(math.ceil(math.log10(MAX_IMG_ID)))}.jpg')
+                cv2.imwrite(img_path, img)
+                contents = self.recover_from_qrcode(img_path)
+                self.logger.info(f"detected {len(contents)} object inside {img_path}")
+                for i in range(len(contents)):
+                    slice_id, max_slice_id, content = self.parse_content(contents[i])
+                    progress = (len(all_slices) - 1) / max_slice_id if max_slice_id is not None else 0
+                    self.logger.info(f"{i}-th: progress = {progress}, slice_id = {slice_id}, max_slice_id = {max_slice_id}, length of content is {len(content)}")
+                    if slice_id is not None:
+                        all_slices[slice_id] = content
+                        all_slices['max_slice_id'] = max_slice_id
+                        self.save_slices(all_slices)
+                cv2.waitKey(interval)
+            else:
+                self.logger.info(f'failed to read frame: {success}')
+                break
+        return
     # recover file from slices
     def recover_file_from_slices(self, slices:dict, outfile='./outfile'):
         content = self.concat_all_slices(slices)
@@ -326,13 +384,13 @@ class FileQrcoder:
         return
     
     def recover_file_from_report(self, report:str='report.json', outfile='./outfile'):
-        logging.info(f'report = {report}, outfile = {outfile}')
+        self.logger.info(f'report = {report}, outfile = {outfile}')
         with open(report) as f:
             r = json.load(f)
         missed_slice_ids = r['missed_slice_ids']
         max_slice_id = r['max_slice_id']
         if len(missed_slice_ids) > 0:
-            logging.error(f'{len(missed_slice_ids)} slices are missed (max slice id = {max_slice_id}), miss rate is {round(len(missed_slice_ids)/max_slice_id * 100, 2)}%')
+            self.logger.error(f'{len(missed_slice_ids)} slices are missed (max slice id = {max_slice_id}), miss rate is {round(len(missed_slice_ids)/max_slice_id * 100, 2)}%')
             return
         self.recover_file_from_slices(r, outfile)
         return
@@ -340,7 +398,7 @@ class FileQrcoder:
     # merge all reports, i.e., merge all dictionaries
     def merge_reports(self, reports:list, merged_report:str=None):
         merged_report = f'report_{utils.timestamp_str()}.json' if merged_report is None else merged_report
-        logging.info(f'merge reports: {reports} => {merged_report}')
+        self.logger.info(f'merge reports: {reports} => {merged_report}')
         slices = {}
         for report in reports:
             with open(report) as f:
@@ -372,9 +430,13 @@ if __name__ == '__main__':
     parser_decode.add_argument('--outdir', type=str, default=None, help='output directory of generated JSON reports')
     parser_decode.add_argument('--outfile', type=str, default=None, help='output file of JSON report')
     
-    parser_decode = subparsers.add_parser("decode_list", help="recover a file from the given list of images containing QR codes", description="recover a file from the given list of images containing QR codes")
-    parser_decode.add_argument('--listfile', type=str, help='images id list file', required=True)
-    parser_decode.add_argument('--cmdfile', type=str, help='command file', required=True)
+    parser_decodelist = subparsers.add_parser("decodelist", help="recover a file from the given list of images containing QR codes", description="recover a file from the given list of images containing QR codes")
+    parser_decodelist.add_argument('--listfile', type=str, help='images id list file', required=True)
+    parser_decodelist.add_argument('--cmdfile', type=str, help='command file', required=True)
+    
+    parser_decodecamera = subparsers.add_parser("decodecamera", help="recover a file from camera", description="recover a file from camera")
+    # parser_decode.add_argument('--listfile', type=str, help='images id list file', required=True)
+    # parser_decode.add_argument('--cmdfile', type=str, help='command file', required=True)
 
     parser_merge = subparsers.add_parser("merge", help="merge all JSON reports", description="merge all JSON reports")
     parser_merge.add_argument('--indir', type=str, help='directory of your JSON reports', required=True)
@@ -478,8 +540,8 @@ if __name__ == '__main__':
                 print(f'{c}\n')
         else:
             print('one of --indir and --infile must not be empty')
-    elif args.command == 'decode_list':
-        print(f'+++++ decode_list +++++')
+    elif args.command == 'decodelist':
+        print(f'+++++ decode from image list +++++')
         print(f'listfile = {args.listfile}, cmdfile = {args.cmdfile}\n')
         old_batch_id = ''
         while True:
@@ -505,6 +567,11 @@ if __name__ == '__main__':
                 else:
                     print(f'generate {len(reports)} reports')
                     time.sleep(2)
+    elif args.command == 'decodecamera':
+        print(f'+++++ decode from camera +++++')
+        fq = FileQrcoder()
+        fq.recover_from_camera()
+        print(f'----- decode from camera -----')
     elif args.command == 'merge':
         print(f'+++++ merge +++++')
         print(f'indir = {args.indir}')
