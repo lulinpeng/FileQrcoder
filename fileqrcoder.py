@@ -350,7 +350,8 @@ class FileQrcoder:
         os.makedirs(outdir, exist_ok=True)
         MAX_IMG_ID = 100000
         img_id = 0
-        all_slices = {} if exist_slices_path is None else self.load_slices('slices.json')
+        exist_slices_path = 'slices.json'
+        all_slices = {} if exist_slices_path is None else self.load_slices(exist_slices_path)
         while True:
             success, img = self.cap.read() # read a frame
             if success:
@@ -363,9 +364,9 @@ class FileQrcoder:
                 self.logger.info(f"detected {len(contents)} object inside {img_path}")
                 for i in range(len(contents)):
                     slice_id, max_slice_id, content = self.parse_content(contents[i])
-                    progress = (len(all_slices) - 1) / max_slice_id if max_slice_id is not None else 0
-                    self.logger.info(f"{i}-th: progress = {progress}, slice_id = {slice_id}, max_slice_id = {max_slice_id}, length of content is {len(content)}")
                     if slice_id is not None:
+                        progress = (len(all_slices) - 1) / max_slice_id
+                        self.logger.info(f"{i}-th: progress = {progress}, slice_id = {slice_id}, max_slice_id = {max_slice_id}, length of content is {len(content)}")
                         all_slices[slice_id] = content
                         all_slices['max_slice_id'] = max_slice_id
                         self.save_slices(all_slices)
