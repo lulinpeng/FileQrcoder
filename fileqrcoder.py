@@ -351,7 +351,11 @@ class FileQrcoder:
         MAX_IMG_ID = 100000
         img_id = 0
         exist_slices_path = 'slices.json'
-        all_slices = {} if exist_slices_path is None else self.load_slices(exist_slices_path)
+        all_slices = {'max_slice_id':None, 'slices':{}} if exist_slices_path is None else self.load_slices(exist_slices_path)
+        is_first = True
+        if all_slices['max_slice_id'] is None:
+            status_bits = [0] * max_slice_id
+            is_first = False
         while True:
             success, img = self.cap.read() # read a frame
             if success:
@@ -365,9 +369,13 @@ class FileQrcoder:
                 for i in range(len(contents)):
                     slice_id, max_slice_id, content = self.parse_content(contents[i])
                     if slice_id is not None:
-                        progress = (len(all_slices) - 1) / max_slice_id
-                        self.logger.info(f"{i}-th: progress = {progress}, slice_id = {slice_id}, max_slice_id = {max_slice_id}, length of content is {len(content)}")
-                        all_slices[slice_id] = content
+                        if is_first:
+                            status_bits = [0] * max_slice_id
+                            is_first = False
+                        status_bits[slice_id] = 1
+                        status = utils.bit_show(status_bits)
+                        self.logger.info(f"{i}-th: slice_id = {slice_id}, max_slice_id = {max_slice_id}, length of content is {len(content)}, {status}")
+                        all_slices['slices'][str(slice_id)] = content
                         all_slices['max_slice_id'] = max_slice_id
                         self.save_slices(all_slices)
                 cv2.waitKey(interval)

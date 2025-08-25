@@ -31,7 +31,7 @@ def bit_to_hex(bits:list):
     return byte_array.hex()
 
 # □■■□■□□□■■□□□■□■■□□■ 45.0%
-def bit_show(bits:list, bin_num:int=100, symbols:dict = {0:'□', 1:'-', 2:'+' ,3:'■'}):
+def bit_show(bits:list, bin_num:int=100, symbols:dict = {0:'-', 1:'+', 2:'□' ,3:'■'}):
     bin_num = len(bits) if len(bits) < bin_num else bin_num
     bins = [0] * bin_num
     bin_size = math.ceil(len(bits) / bin_num)
