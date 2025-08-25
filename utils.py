@@ -13,6 +13,23 @@ import json
 # log setting
 logging.basicConfig(format='%(asctime)s.%(msecs)03d [%(levelname)s] [%(filename)s:%(lineno)d] %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S', level=logging.DEBUG)
+
+# bit vector to byte vector with padding 0
+def bit_to_byte(bits:list, little_endian:bool=True):
+    padding_bits = (8 - len(bits) % 8) % 8
+    padded_vec = bits + [1] * padding_bits
+    byte_array = []
+    for i in range(0, len(padded_vec), 8):
+        byte = padded_vec[i:i+8]
+        byte_value = sum([byte[j] << (j if little_endian else 7-j) for j in range(8)])
+        byte_array.append(byte_value)
+    return bytes(byte_array)
+
+# bit vector to hex
+def bit_to_hex(bits:list):
+    byte_array = bit_to_byte(bits)
+    return byte_array.hex()
+
 # □■■□■□□□■■□□□■□■■□□■ 45.0%
 def bit_show(bits:list, bin_num:int=100, symbols:dict = {0:'□', 1:'-', 2:'+' ,3:'■'}):
     bin_num = len(bits) if len(bits) < bin_num else bin_num
