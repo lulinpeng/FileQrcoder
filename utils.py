@@ -13,6 +13,15 @@ import json
 # log setting
 logging.basicConfig(format='%(asctime)s.%(msecs)03d [%(levelname)s] [%(filename)s:%(lineno)d] %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S', level=logging.DEBUG)
+# □■■□■□□□■■□□□■□■■□□■ 45.0%
+def bit_show(bits:list, bin_num:int=100, symbols:dict = {0:'□', 1:'-', 2:'+' ,3:'■'}):
+    bin_num = len(bits) if len(bits) < bin_num else bin_num
+    bins = [0] * bin_num
+    bin_size = math.ceil(len(bits) / bin_num)
+    bins = [sum(bits[i * bin_size:(i+1)*bin_size]) for i in range(bin_num)]
+    res = [symbols[round(bin * (len(symbols) - 1) / bin_size)] for bin in bins]
+    progress = sum(bits) / len(bits)
+    return ''.join(res) + f' {round(progress*100,4)}%'
 
 # compress a file with ZSTD library
 def compress_file(infile:str, outfile:str=None, level:int=None):
