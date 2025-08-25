@@ -14,10 +14,24 @@ import json
 logging.basicConfig(format='%(asctime)s.%(msecs)03d [%(levelname)s] [%(filename)s:%(lineno)d] %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S', level=logging.DEBUG)
 
+# hex string to bits
+def hex_to_bit(hex_str:str):
+    byte_array = hex_to_byte(hex_str)
+    return byte_to_bit(byte_array)
+
+# hex string to bytes
+def hex_to_byte(hex_str:str):
+    assert(len(hex_str) % 2 == 0)
+    return bytes.fromhex(hex_str)
+
+# byte vector to bit vector
+def byte_to_bit(byte_array:bytes):
+    return [(byte >> i) & 1 for byte in byte_array for i in range(7, -1, -1)]
+
 # bit vector to byte vector with padding 0
-def bit_to_byte(bits:list, little_endian:bool=True):
+def bit_to_byte(bits:list, little_endian:bool=False):
     padding_bits = (8 - len(bits) % 8) % 8
-    padded_vec = bits + [1] * padding_bits
+    padded_vec = bits + [0] * padding_bits
     byte_array = []
     for i in range(0, len(padded_vec), 8):
         byte = padded_vec[i:i+8]

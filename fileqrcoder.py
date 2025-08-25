@@ -320,7 +320,7 @@ class FileQrcoder:
     def save_slices(self, slices:dict, path:str=None):
         self.logger.info('save slices')
         path = 'slices.json' if path is None else path
-        if len(slices) % 10 == 0 or slices['max_slice_id'] == len(slices) - 1:
+        if round(time.time()) % 5 == 0 or slices['max_slice_id'] == len(slices) - 1:
             with open(path, 'w') as f:
                 json.dump(slices, f)
         return
