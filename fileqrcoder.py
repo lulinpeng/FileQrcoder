@@ -318,8 +318,8 @@ class FileQrcoder:
         return all_slices
     
     def save_slices(self, slices:dict, path:str=None):
-        self.logger.info('save slices')
         path = 'slices.json' if path is None else path
+        self.logger.info(f'save slices: {path}')
         if round(time.time()) % 5 == 0 or slices['max_slice_id'] == len(slices) - 1:
             with open(path, 'w') as f:
                 json.dump(slices, f)
@@ -380,6 +380,7 @@ class FileQrcoder:
                         self.save_slices(all_slices)
                 cv2.waitKey(interval)
             else:
+                self.save_slices(all_slices)
                 self.logger.info(f'failed to read frame: {success}')
                 break
         return
