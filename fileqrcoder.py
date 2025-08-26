@@ -209,7 +209,7 @@ class FileQrcoder:
         self.logger.debug(f'max_slice_id = {max_slice_id}')
         missed_slice_ids = []
         for i in range(max_slice_id):
-            if str(i) not in all_slices:
+            if str(i) not in all_slices['slices']:
                 missed_slice_ids.append(i)
         return missed_slice_ids
     
@@ -220,7 +220,7 @@ class FileQrcoder:
         header_len = self.index_len+self.max_index_len
         for i in range(max_slice_id):
             self.logger.debug(f'concating {i} / {max_slice_id} slice')
-            content += all_slices[str(i)][header_len:]
+            content += all_slices['slices'][str(i)][header_len:]
         return content
     
     # decode the given base64 string into bytes which is then written to file
@@ -286,7 +286,7 @@ class FileQrcoder:
         print(f'recover_slices_from_qrcodes: len(qrcode_imgs) = {len(qrcode_imgs)}')
         from pyzbar import pyzbar
         from PIL import Image
-        all_slices = {}
+        all_slices = {'max_slice_id':None, 'slices':{}}
         max_slice_id = None
         for i in range(len(qrcode_imgs)):
             self.logger.info(f'{process_id}-th process: recover {i} / {len(qrcode_imgs)}, {qrcode_imgs[i]}')
@@ -305,7 +305,7 @@ class FileQrcoder:
                     self.logger.error(f'temp report is saved in file {tmp_report}, skip {i}-th images {qrcode_imgs[i]}')
                     continue
                 self.logger.info(f'{process_id}-th process: recover {i} / {len(qrcode_imgs)}, {round((len(content)) / 1024 / (4/3), 3)} KB, slice_id = {slice_id}, img path = {qrcode_imgs[i]}')
-                all_slices[slice_id] = content
+                all_slices['slices'][slice_id] = content
        
         if max_slice_id is None: # save resolved slices
             self.logger.info('not found any qrcode')
