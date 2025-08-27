@@ -204,23 +204,23 @@ class FileQrcoder:
         return img_paths
     
     # return a list of ids of all missed slices
-    def find_missed_slices(self, all_slices:dict):
-        max_slice_id = all_slices['max_slice_id']
+    def find_missed_slices(self, slices:dict):
+        max_slice_id = slices['max_slice_id']
         self.logger.debug(f'max_slice_id = {max_slice_id}')
         missed_slice_ids = []
         for i in range(max_slice_id):
-            if str(i) not in all_slices['slices']:
+            if str(i) not in slices['slices']:
                 missed_slice_ids.append(i)
         return missed_slice_ids
     
     # concatenate all slice information
-    def concat_all_slices(self, all_slices:dict):
-        max_slice_id =  all_slices['max_slice_id']
+    def concat_slices(self, slices:dict):
+        max_slice_id =  slices['max_slice_id']
         content = ''
         header_len = self.index_len+self.max_index_len
         for i in range(max_slice_id):
             self.logger.debug(f'concating {i} / {max_slice_id} slice')
-            content += all_slices['slices'][str(i)][header_len:]
+            content += slices['slices'][str(i)][header_len:]
         return content
     
     # decode the given base64 string into bytes which is then written to file
@@ -286,7 +286,7 @@ class FileQrcoder:
         print(f'recover_slices_from_qrcodes: len(qrcode_imgs) = {len(qrcode_imgs)}')
         from pyzbar import pyzbar
         from PIL import Image
-        all_slices = {'max_slice_id':None, 'slices':{}}
+        slices = {'max_slice_id':None, 'slices':{}}
         max_slice_id = None
         for i in range(len(qrcode_imgs)):
             self.logger.info(f'{process_id}-th process: recover {i} / {len(qrcode_imgs)}, {qrcode_imgs[i]}')
@@ -301,26 +301,26 @@ class FileQrcoder:
                     time_str = time.strftime('%m%d%H%M%S')
                     tmp_report = f'{report}.{time_str}.tmp.json'
                     with open(report + '.tmp.json', 'w') as f:
-                        json.dump(all_slices, f)
+                        json.dump(slices, f)
                     self.logger.error(f'temp report is saved in file {tmp_report}, skip {i}-th images {qrcode_imgs[i]}')
                     continue
                 self.logger.info(f'{process_id}-th process: recover {i} / {len(qrcode_imgs)}, {round((len(content)) / 1024 / (4/3), 3)} KB, slice_id = {slice_id}, img path = {qrcode_imgs[i]}')
-                all_slices['slices'][slice_id] = content
+                slices['slices'][slice_id] = content
        
         if max_slice_id is None: # save resolved slices
             self.logger.info('not found any qrcode')
             return None
-        all_slices['max_slice_id'] = max_slice_id
-        missed_slice_ids = self.find_missed_slices(all_slices)
-        all_slices['missed_slice_ids'] = missed_slice_ids
+        slices['max_slice_id'] = max_slice_id
+        missed_slice_ids = self.find_missed_slices(slices)
+        slices['missed_slice_ids'] = missed_slice_ids
         with open(report, 'w') as f:
-            json.dump(all_slices, f)
-        return all_slices
+            json.dump(slices, f)
+        return slices
     
     def save_slices(self, slices:dict, path:str=None):
         path = 'slices.json' if path is None else path
-        self.logger.info(f'save slices: {path}')
         if round(time.time()) % 5 == 0 or slices['max_slice_id'] == len(slices) - 1:
+            self.logger.info(f'save slices: {path}')
             with open(path, 'w') as f:
                 json.dump(slices, f)
         return
@@ -335,6 +335,7 @@ class FileQrcoder:
     def recover_from_camera(self, fps:float=None, exist_slices_path:str=None):
         import cv2
         fps = 20 if fps is None else fps
+        interval = round(1000 / fps)
         self.width = 720
         self.height = 720
         stream_url = "http://192.168.1.5:8080/video"
@@ -351,42 +352,44 @@ class FileQrcoder:
         MAX_IMG_ID = 100000
         img_id = 0
         exist_slices_path = 'slices.json'
-        all_slices = {'max_slice_id':None, 'slices':{}} if exist_slices_path is None else self.load_slices(exist_slices_path)
+        slices = {'max_slice_id':None, 'slices':{}} if exist_slices_path is None else self.load_slices(exist_slices_path)
         is_first = True
-        if all_slices['max_slice_id'] is None:
+        if slices['max_slice_id'] is None:
             status_bits = [0] * max_slice_id
             is_first = False
         while True:
             success, img = self.cap.read() # read a frame
             if success:
                 cv2.imshow("FileQrcoder", img)
-                interval = round(1000 / fps)
                 img_id = (img_id + 1) % MAX_IMG_ID
                 img_path = os.path.join(outdir, f'{str(img_id).zfill(math.ceil(math.log10(MAX_IMG_ID)))}.jpg')
                 cv2.imwrite(img_path, img)
                 contents = self.recover_from_qrcode(img_path)
-                self.logger.info(f"detected {len(contents)} object inside {img_path}")
+                self.logger.info(f"detected {len(contents)} objects inside {img_path}")
                 for i in range(len(contents)):
                     slice_id, max_slice_id, content = self.parse_content(contents[i])
                     if slice_id is not None:
                         if is_first:
                             status_bits = [0] * max_slice_id
                             is_first = False
+                            for i in range(max_slice_id):
+                                if str(i) in slices['slices']:
+                                    status_bits[i] = 1
                         status_bits[slice_id] = 1
                         status = utils.bit_show(status_bits)
                         self.logger.info(f"{i}-th: slice_id = {slice_id}, max_slice_id = {max_slice_id}, length of content is {len(content)}, {status}")
-                        all_slices['slices'][str(slice_id)] = content
-                        all_slices['max_slice_id'] = max_slice_id
-                        self.save_slices(all_slices)
+                        slices['slices'][str(slice_id)] = content
+                        slices['max_slice_id'] = max_slice_id
+                        self.save_slices(slices)
                 cv2.waitKey(interval)
             else:
-                self.save_slices(all_slices)
+                self.save_slices(slices)
                 self.logger.info(f'failed to read frame: {success}')
                 break
         return
     # recover file from slices
     def recover_file_from_slices(self, slices:dict, outfile='./outfile'):
-        content = self.concat_all_slices(slices)
+        content = self.concat_slices(slices)
         base64_str = content
         if self.sk is not None:
             base64_str = content
@@ -397,11 +400,11 @@ class FileQrcoder:
         self.logger.info(f'report = {report}, outfile = {outfile}')
         with open(report) as f:
             r = json.load(f)
-        missed_slice_ids = r['missed_slice_ids']
+        # missed_slice_ids = r['missed_slice_ids']
         max_slice_id = r['max_slice_id']
-        if len(missed_slice_ids) > 0:
-            self.logger.error(f'{len(missed_slice_ids)} slices are missed (max slice id = {max_slice_id}), miss rate is {round(len(missed_slice_ids)/max_slice_id * 100, 2)}%')
-            return
+        # if len(missed_slice_ids) > 0:
+        #     self.logger.error(f'{len(missed_slice_ids)} slices are missed (max slice id = {max_slice_id}), miss rate is {round(len(missed_slice_ids)/max_slice_id * 100, 2)}%')
+        #     return
         self.recover_file_from_slices(r, outfile)
         return
 
