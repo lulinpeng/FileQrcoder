@@ -325,6 +325,21 @@ class FileQrcoder:
                 json.dump(slices, f)
         return
     
+    def slices_status(self, slices_file:str=None):
+        slices_file = 'slices.json' if slices_file is None else slices_file
+        import json
+        with open(slices_file) as f:
+            slices = json.load(f)
+        max_slice_id = slices['max_slice_id']
+        status_bits = [0] * max_slice_id
+        for slice_id in slices['slices']:
+            status_bits[eval(slice_id)] = 1 
+        # print(status_bits)
+        # print(len(status_bits))
+        hex_str = utils.bit_to_hex(status_bits)
+        # print(f'status hex string: {hex_str}')
+        return hex_str
+    
     def load_slices(self, path:str=None):
         self.logger.info('loading slices')
         path = 'slices.json' if path is None else path
@@ -519,6 +534,8 @@ if __name__ == '__main__':
     parser_image2gif.add_argument('--infile', type=str, help='input file', required=True)
     parser_image2gif.add_argument('--outfile', type=str, default=None, help='output file')
     
+    parser_slicesstatus = subparsers.add_parser("slicesstatus", help="print status of slices", description="print status of slices")
+    parser_slicesstatus.add_argument('--infile', type=str, help='input file', required=True)
   
     args = parser.parse_args()
     
@@ -654,3 +671,8 @@ if __name__ == '__main__':
     elif args.command == 'decompress':
         print(f'+++++ decompress +++++')
         utils.decompress_file(args.infile, args.outfile)
+    elif args.command == 'slicesstatus':
+        print(f'+++++ slicesstatus +++++')
+        fq = FileQrcoder()
+        status = fq.slices_status(args.infile)
+        print(f'status: {status}')
